@@ -12,6 +12,7 @@ const canvasWidth = blockSize * cols, canvasHeight = blockSize * rows;
 
 // ..... data, blocks?
 let tetrominoes = [];
+let currentTetromino;
 let blockNum = -1;      // probably should use a game object so this isn't global
                         // first block will be block # 0
 
@@ -147,14 +148,32 @@ function createTetromino () {
   blockNum++;
   
   console.log(" *** CREATING TETROMINO #" + blockNum);
-  
+ 
+  // Create and push to array of tetrominoes 
   let tetromino = new Tetromino();
   tetrominoes.push(tetromino);
-  
+
+  // Update currently active tetromino (global var for now) 
+  currentTetromino = tetrominoes[tetrominoes.length - 1]; 
 }
 
+// Move block left/right on key press:
+    // NOTE: using p5js for this, could also just use plain JS event listener
+        // TODO: move tetromino when HOLDING down the keys as well
 
+function keyPressed() {
+  console.log("Key pressed!");
+  // Draw next frame on key press (in addition to on mouse click)
+  redraw();
 
+  if (keyCode === LEFT_ARROW) {
+   currentTetromino.moveLeft();
+   console.log("---- LEFT");
+  } else if (keyCode === RIGHT_ARROW) {
+   currentTetromino.moveRight();
+   console.log("---- RIGHT");
+  }
+}
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // SETUP FOR P5JS DRAWING:
@@ -199,7 +218,6 @@ function draw() {
 
   } // end for/of loop
 
-  let currentTetromino = tetrominoes[tetrominoes.length - 1]; 
 
   if (currentTetromino.hasRoomBelow() ) {
     console.log("has room below!");
@@ -212,14 +230,13 @@ function draw() {
     createTetromino();
   }
 
-
   
 } // end draw()
 
 
 
 // For now, run next frame on mouse click!
-function mousePressed() {
-  redraw();
-}
-
+// function mousePressed() {
+//   redraw();
+// }
+// 
