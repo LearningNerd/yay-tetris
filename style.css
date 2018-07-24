@@ -1,0 +1,19 @@
+/* CSS files add styling rules to your content */
+
+body {
+  font-family: "Benton Sans", "Helvetica Neue", helvetica, arial, sans-serif;
+  margin: 2em;
+
+  text-align: center;
+}
+
+h1 {
+  font-style: italic;
+  color: #373fff;
+}
+
+canvas {
+  border: 1px solid black;
+  margin: 2em auto;
+}
+
