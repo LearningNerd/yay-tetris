@@ -25,31 +25,31 @@ gameGrid.forEach(row => console.log(row));
 
 
 // Tetromino constructor
-function Tetromino (x, y) {
+function Tetromino (row, col) {
   
   console.log("****** TETROMINO CONSTRUCTOR CALLED *********");
   
   // Default to top left corner of canvas
-  if (x == null) {
-    this.x = 0;
+  if (row == null) {
+    this.row = 0;
   } else {
-    this.x = x;
+    this.row = row;
   }
   
-  if (y == null) {
-    this.y = 0;
+  if (col == null) {
+    this.col = 0;
   } else {
-    this.y = y;
+    this.col = col;
   }
   
-  console.log("x and y: " + this.x + ", " + this.y);
+  console.log("row and col: " + this.row + ", " + this.col);
   
   // TODO: draw each block of this tetromino with randomized color
   this.color = "yellow";
  
   
   // Add EACH BLOCK to the gameGrid:
-  gameGrid[this.x][this.y] = 1;
+  gameGrid[this.row][this.col] = 1;
   
   
       // To see the grid in console:
@@ -61,8 +61,8 @@ function Tetromino (x, y) {
   this.draw = function() {
         
     // Actual coordinates for drawing: multiple row/col by the blockSize (pixel value)
-    let xPos = this.y * blockSize;
-    let yPos = this.x * blockSize;
+    let xPos = this.col * blockSize;
+    let yPos = this.row * blockSize;
     
     rect(xPos, yPos, blockSize, blockSize);
   };
@@ -71,8 +71,8 @@ function Tetromino (x, y) {
   this.moveDown = function() {
     console.log("called moveDown");
     
-    let prevX = this.x;
-    let prevY = this.y;
+    let prevX = this.row;
+    let prevY = this.col;
 
     
     console.log("prev coords: " + prevX + ", " + prevY);
@@ -80,13 +80,13 @@ function Tetromino (x, y) {
     console.log(gameGrid);
     
     // Move down 1 row
-    this.x++;
+    this.row++;
     
     // Update position in the game grid (switch off prev position, switch on next position)
     gameGrid[prevX][prevY] = 0;
-    gameGrid[this.x][this.y] = 1;
+    gameGrid[this.row][this.col] = 1;
     
-    console.log("new coords: " + this.x + ", " + this.y);
+    console.log("new coords: " + this.row + ", " + this.col);
     
     // To see the grid in console:
     gameGrid.forEach(row => console.log(row));
@@ -95,21 +95,21 @@ function Tetromino (x, y) {
   
   
   this.moveLeft = function() {
-    this.x--;
+    this.row--;
   };
   
   this.moveRight = function() {
-    this.x++;
+    this.row++;
   };
   
   // Returns true if this tetromino has an empty square below
   // TODO: will need to do this comparison for this Tetromino's block with lowest y coordinate
   this.hasRoomBelow = function() {
     
-    console.log("checking coords: " + this.x + ", " + this.y);
+    console.log("checking coords: " + this.row + ", " + this.col);
     
     // If square below this block is empty, return true!
-    if (gameGrid[this.x + 1] && gameGrid[this.x + 1][this.y] === 0) {
+    if (gameGrid[this.row + 1] && gameGrid[this.row + 1][this.col] === 0) {
       console.log("there is room below");
       return true; 
     }
@@ -124,7 +124,7 @@ function Tetromino (x, y) {
 //   // Return true if this block is falling (it's NOT at the bottom of the canvas)
 //   this.isFalling = function () {
   
-//     let yPos = this.y * blockSize;
+//     let yPos = this.col * blockSize;
     
 //     // If it's at the bottom, return false!
 //     if (yPos >= canvasHeight - blockSize) {
