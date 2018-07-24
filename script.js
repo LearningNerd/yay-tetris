@@ -20,7 +20,7 @@ let gameGrid = new Array(rows).fill(null).map(row => new Array(cols).fill(0));
 
 console.log("****** GRID CREATED *********");
 // To see the grid in console:
-gameGrid.forEach(row => console.log(row));
+// gameGrid.forEach(row => console.log(row));
 
 
 
@@ -77,8 +77,6 @@ function Tetromino (row, col) {
     
     console.log("prev coords: " + prevX + ", " + prevY);
     
-    console.log(gameGrid);
-    
     // Move down 1 row
     this.row++;
     
@@ -89,28 +87,27 @@ function Tetromino (row, col) {
     console.log("new coords: " + this.row + ", " + this.col);
     
     // To see the grid in console:
-    gameGrid.forEach(row => console.log(row));
+    // gameGrid.forEach(row => console.log(row));
     
   };
   
   
   this.moveLeft = function() {
-    this.row--;
+    this.col--;
   };
   
   this.moveRight = function() {
-    this.row++;
+    this.col++;
   };
   
   // Returns true if this tetromino has an empty square below
   // TODO: will need to do this comparison for this Tetromino's block with lowest y coordinate
   this.hasRoomBelow = function() {
     
-    console.log("checking coords: " + this.row + ", " + this.col);
+    // console.log("checking coords: " + this.row + ", " + this.col);
     
     // If square below this block is empty, return true!
     if (gameGrid[this.row + 1] && gameGrid[this.row + 1][this.col] === 0) {
-      console.log("there is room below");
       return true; 
     }
     
@@ -176,9 +173,6 @@ function setup() {
   // For now, run next frame on mouse click!
   noLoop();
   
-    let tetr1 = Array.from(tetrominoes);
-  console.log(tetr1);
-  
   // INITIALIZE THE GAME -- create the first tetromino
   createTetromino();
   
@@ -192,39 +186,33 @@ function draw() {
   // Clear the canvas on each frame, with a background color
   background("pink");
   
+  console.log("Tetrominoes array:");
   console.log(tetrominoes);
   
   let t = tetrominoes[0];
   
-  t.draw();
+  // Draw ALL tetrominoes on each frame. NOTE: drawing first, so on first frame it starts at y=0
+  for (tetromino of tetrominoes) {
+  //  console.log("block num #" + tetromino.blockNum + " -- initial y: " + tetromino.y);
+ 
+    tetromino.draw();
+
+  } // end for/of loop
+
+  let currentTetromino = tetrominoes[tetrominoes.length - 1]; 
+
+  if (currentTetromino.hasRoomBelow() ) {
+    console.log("has room below!");
+    currentTetromino.moveDown();  // update position for the next tick
+ 
+  // Otherwise if the current tetromino has landed, drop the next one!
+  } else {
   
-  if (t.hasRoomBelow() ) {
-   console.log("t has room below");
-    t.moveDown();
+    console.log("Current tetromino has landed");
+    createTetromino();
   }
-  
 
-//   for (tetromino of tetrominoes) {
-//     console.log("block num #" + tetromino.blockNum + " -- initial y: " + tetromino.y);
-    
-//     // Draw ALL tetrominoes on each frame. NOTE: drawing first, so first frame it starts at y=0
-//     tetromino.draw();
-    
-//     if ( tetromino.hasRoomBelow() ) {
-//       console.log("has room below!");
-//       tetromino.moveDown();  // update position for the next tick
-      
-//     // Otherwise if this tetromino has landed, AND it's the most recent tetromino (the current one)
-//     } else if ( tetromino === tetrominoes[tetrominoes.length - 1] ) {
-       
-//       // Drop the next one
-//       createTetromino();
-//     }
-    
-    
 
-//   } // end for/of loop
-  
   
 } // end draw()
 
