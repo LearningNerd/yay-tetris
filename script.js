@@ -30,9 +30,9 @@ function Tetromino (row, col) {
   
   console.log("****** TETROMINO CONSTRUCTOR CALLED *********");
   
-  // Default to top left corner of canvas
+  // Default to top left corner of canvas -- first tick will move it down row 0 and draw it there!
   if (row == null) {
-    this.row = 0;
+    this.row = -1;
   } else {
     this.row = row;
   }
@@ -48,12 +48,7 @@ function Tetromino (row, col) {
   // TODO: draw each block of this tetromino with randomized color
   this.color = "yellow";
  
-  
-  // Add EACH BLOCK to the gameGrid:
-  gameGrid[this.row][this.col] = 1;
-  
-  
-      // To see the grid in console:
+    // To see the grid in console:
     //gameGrid.forEach(row => console.log(row));
   
   // Just for testing:
@@ -72,17 +67,22 @@ function Tetromino (row, col) {
   this.moveDown = function() {
     console.log("called moveDown");
     
-    let prevX = this.row;
-    let prevY = this.col;
+    let prevRow = this.row;
+    let prevCol = this.col;
 
     
-    console.log("prev coords: " + prevX + ", " + prevY);
+    console.log("prev coords: " + prevRow + ", " + prevCol);
     
     // Move down 1 row
     this.row++;
     
     // Update position in the game grid (switch off prev position, switch on next position)
-    gameGrid[prevX][prevY] = 0;
+    
+    // Only switch off previous position if this tetromino is already on the screen
+    if (prevRow >= 0) {
+      gameGrid[prevRow][prevCol] = 0;
+    }
+
     gameGrid[this.row][this.col] = 1;
     
     console.log("new coords: " + this.row + ", " + this.col);
@@ -157,24 +157,6 @@ function createTetromino () {
   currentTetromino = tetrominoes[tetrominoes.length - 1]; 
 }
 
-// Move block left/right on key press:
-    // NOTE: using p5js for this, could also just use plain JS event listener
-        // TODO: move tetromino when HOLDING down the keys as well
-
-function keyPressed() {
-  console.log("Key pressed!");
-  // Draw next frame on key press (in addition to on mouse click)
-  redraw();
-
-  if (keyCode === LEFT_ARROW) {
-   currentTetromino.moveLeft();
-   console.log("---- LEFT");
-  } else if (keyCode === RIGHT_ARROW) {
-   currentTetromino.moveRight();
-   console.log("---- RIGHT");
-  }
-}
-
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // SETUP FOR P5JS DRAWING:
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -187,7 +169,7 @@ function setup() {
   createCanvas(canvasWidth, canvasHeight);
 
   // 2 frames per second, easier for testing :)
-  // frameRate(2);
+  frameRate(2);
   
   // For now, run next frame on mouse click!
   noLoop();
@@ -201,6 +183,14 @@ function setup() {
 
 // Animation loop / game loop:
 function draw() {
+  // Update coords based on which keys are currently being pressed
+  if (keyIsDown(LEFT_ARROW)) {
+   currentTetromino.moveLeft();
+   console.log("---- LEFT");
+  } else if (keyIsDown(RIGHT_ARROW)) {
+   currentTetromino.moveRight();
+   console.log("---- RIGHT");
+  }
 
   // Clear the canvas on each frame, with a background color
   background("pink");
@@ -208,17 +198,6 @@ function draw() {
   console.log("Tetrominoes array:");
   console.log(tetrominoes);
   
-  let t = tetrominoes[0];
-  
-  // Draw ALL tetrominoes on each frame. NOTE: drawing first, so on first frame it starts at y=0
-  for (tetromino of tetrominoes) {
-  //  console.log("block num #" + tetromino.blockNum + " -- initial y: " + tetromino.y);
- 
-    tetromino.draw();
-
-  } // end for/of loop
-
-
   if (currentTetromino.hasRoomBelow() ) {
     console.log("has room below!");
     currentTetromino.moveDown();  // update position for the next tick
@@ -230,13 +209,24 @@ function draw() {
     createTetromino();
   }
 
-  
+  // Draw ALL tetrominoes on each frame, AFTER updating position 
+  for (tetromino of tetrominoes) {
+  //  console.log("block num #" + tetromino.blockNum + " -- initial y: " + tetromino.y);
+ 
+    tetromino.draw();
+
+  } // end for/of loop
+
+
+
 } // end draw()
 
 
+// Draw next frame when pressing any arrow key
+function keyPressed() {
+  if (keyCode === LEFT_ARROW || keyCode === RIGHT_ARROW || keyCode === UP_ARROW || keyCode === DOWN_ARROW) {
+    console.log("Key pressed!");
+    redraw();
+  }
+}
 
-// For now, run next frame on mouse click!
-// function mousePressed() {
-//   redraw();
-// }
-// 
