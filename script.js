@@ -63,7 +63,9 @@ function Tetromino (row, col) {
     rect(xPos, yPos, blockSize, blockSize);
   };
   
-  
+  // NOTE: moveDown should be called on every "tick" of game loop,
+  // but calling moveLeft or moveRight should instantly redraw... I think?
+  // But, leaving that for later.
   this.moveDown = function() {
     console.log("called moveDown");
     
@@ -73,7 +75,8 @@ function Tetromino (row, col) {
     
     console.log("prev coords: " + prevRow + ", " + prevCol);
     
-    // Move down 1 row
+    // Move down 1 row -- NOTE: checking externally for collisions only BELOW each block.
+    // ....should probably fix that!
     this.row++;
     
     // Update position in the game grid (switch off prev position, switch on next position)
@@ -94,13 +97,64 @@ function Tetromino (row, col) {
   
   
   this.moveLeft = function() {
-    this.col--;
+
+    // If there's an empty square to the left, move it. Otherwise, don't move it!
+    if (gameGrid[this.row] && gameGrid[this.row][this.col - 1] === 0) {
+
+      let prevRow = this.row;
+      let prevCol = this.col;
+
+      console.log("prev coords: " + prevRow + ", " + prevCol);
+      
+      this.col--;
+
+      // Only switch off previous position if this tetromino is already on the screen
+      if (prevRow >= 0) {
+        gameGrid[prevRow][prevCol] = 0;
+      }
+
+      // Switch on new position to the side (and shortly after, moveDown will update position down!)
+      gameGrid[this.row][this.col] = 1;
+  
+      console.log("new coords: " + this.row + ", " + this.col);
+  
+    } else {
+      console.log("No room to the left!!!!!");
+    }
+
   };
   
+
   this.moveRight = function() {
-    this.col++;
+
+    // If there's an empty square to the right, move it. Otherwise, don't move it!
+    if (gameGrid[this.row] && gameGrid[this.row][this.col + 1] === 0) {
+
+      let prevRow = this.row;
+      let prevCol = this.col;
+
+      console.log("prev coords: " + prevRow + ", " + prevCol);
+      
+      this.col++;
+
+      // Only switch off previous position if this tetromino is already on the screen
+      if (prevRow >= 0) {
+        gameGrid[prevRow][prevCol] = 0;
+      }
+
+      // Switch on new position to the side (and shortly after, moveDown will update position down!)
+      gameGrid[this.row][this.col] = 1;
+  
+      console.log("new coords: " + this.row + ", " + this.col);
+  
+    } else {
+      console.log("No room to the right!!!!!");
+    }
+
   };
   
+
+
   // Returns true if this tetromino has an empty square below
   // TODO: will need to do this comparison for this Tetromino's block with lowest y coordinate
   this.hasRoomBelow = function() {
@@ -111,7 +165,11 @@ function Tetromino (row, col) {
     if (gameGrid[this.row + 1] && gameGrid[this.row + 1][this.col] === 0) {
       return true; 
     }
-    
+   
+  console.log("*******************");
+  console.log("NEXT coords checking against: " + (this.row + 1) + ", " + this.col);
+  console.log("*******************");
+ 
     console.log("NO ROOM below. The block has landed.");
     
     return false;
@@ -197,7 +255,11 @@ function draw() {
   
   console.log("Tetrominoes array:");
   console.log(tetrominoes);
-  
+ 
+  console.log("*******************");
+  console.log("cur coords: " + currentTetromino.row + ", " + currentTetromino.col);
+  console.log("*******************");
+ 
   if (currentTetromino.hasRoomBelow() ) {
     console.log("has room below!");
     currentTetromino.moveDown();  // update position for the next tick
@@ -205,7 +267,6 @@ function draw() {
   // Otherwise if the current tetromino has landed, drop the next one!
   } else {
   
-    console.log("Current tetromino has landed");
     createTetromino();
   }
 
