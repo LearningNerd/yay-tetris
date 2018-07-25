@@ -4,7 +4,7 @@ console.log('hi');
 
 // Size of squares in the game, in pixels
 const blockSize = 25;
-const rows = 4, cols = 2;
+const rows = 8, cols = 4;
 
 const canvasWidth = blockSize * cols, canvasHeight = blockSize * rows;
 
@@ -215,6 +215,16 @@ function createTetromino () {
   currentTetromino = tetrominoes[tetrominoes.length - 1]; 
 }
 
+
+// Later: a nicer "game over" screen
+function endGame() {
+  console.log("Game over!");
+  
+  let x = document.body.innerHTML;  
+  document.body.innerHTML = x + " <h1>Game over!</h1>"; 
+
+}
+
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // SETUP FOR P5JS DRAWING:
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -259,14 +269,20 @@ function draw() {
   console.log("*******************");
   console.log("cur coords: " + currentTetromino.row + ", " + currentTetromino.col);
   console.log("*******************");
- 
+
+
+  // If there's room below this tetromino, let it keep falling
   if (currentTetromino.hasRoomBelow() ) {
     console.log("has room below!");
     currentTetromino.moveDown();  // update position for the next tick
  
-  // Otherwise if the current tetromino has landed, drop the next one!
-  } else {
+  // Otherwise, if the newest tetromino has no room and it's sitting above the screen, game over!
+  } else if (currentTetromino.row === -1) {
+
+    endGame();
   
+  // Otherwise if the current tetromino has landed, drop the next one!
+  } else { 
     createTetromino();
   }
 
