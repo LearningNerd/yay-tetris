@@ -5,6 +5,7 @@ console.log('hi');
 // Size of squares in the game, in pixels
 const blockSize = 25;
 const rows = 8, cols = 4;
+const colors = ["#ffeaa7", "#55efc4", "#74b9ff", "#ff7675"];
 
 const canvasWidth = blockSize * cols, canvasHeight = blockSize * rows;
 
@@ -45,10 +46,10 @@ function Tetromino (row, col) {
   
   console.log("row and col: " + this.row + ", " + this.col);
   
-  // TODO: draw each block of this tetromino with randomized color
-  this.color = "yellow";
- 
-    // To see the grid in console:
+  // Each tetromino has a random color from the (global) colors array defined for the game
+  this.color = colors[getRandomIntInclusive(0, colors.length-1)];
+
+  // To see the grid in console:
     //gameGrid.forEach(row => console.log(row));
   
   // Just for testing:
@@ -59,7 +60,8 @@ function Tetromino (row, col) {
     // Actual coordinates for drawing: multiple row/col by the blockSize (pixel value)
     let xPos = this.col * blockSize;
     let yPos = this.row * blockSize;
-    
+   
+    fill(this.color); 
     rect(xPos, yPos, blockSize, blockSize);
   };
   
@@ -261,7 +263,7 @@ function draw() {
   }
 
   // Clear the canvas on each frame, with a background color
-  background("pink");
+  background("lightgrey");
   
   console.log("Tetrominoes array:");
   console.log(tetrominoes);
@@ -306,4 +308,18 @@ function keyPressed() {
     redraw();
   }
 }
+
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// HELPER FUNCTIONS:
+////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+// Get a random integer between two values, inclusive -- via MDN
+function getRandomIntInclusive(min, max) {
+  min = Math.ceil(min);
+  max = Math.floor(max);
+  return Math.floor(Math.random() * (max - min + 1)) + min; //The maximum is inclusive and the minimum is inclusive 
+}
+
+
 
