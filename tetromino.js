@@ -27,9 +27,6 @@ export function Tetromino (gameGrid, blockSize, p5js, row, col) {
   // To see the grid in console:
     //gameGrid.forEach(row => console.log(row));
   
-  // Just for testing:
-  this.blockNum = blockNum + 1;
-  
   this.draw = function() {
         
     // Actual coordinates for drawing: multiple row/col by the blockSize (pixel value)

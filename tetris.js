@@ -16,8 +16,6 @@ const canvasWidth = blockSize * cols, canvasHeight = blockSize * rows;
 // ..... data, blocks?
 let tetrominoes = [];
 let currentTetromino;
-let blockNum = -1;      // probably should use a game object so this isn't global
-                        // first block will be block # 0
 
 // Generate 2D array based on rows / cols, each element populated with 0s
 let gameGrid = new Array(rows).fill(null).map(row => new Array(cols).fill(0));
@@ -31,9 +29,8 @@ console.log("****** GRID CREATED *********");
 // Create a new tetromino and add to tetrominoes array
 function createTetromino () {
   // FOR TESTING: increase counter to identify each block
-  blockNum++;
   
-  console.log(" *** CREATING TETROMINO #" + blockNum);
+  console.log(" *** CREATING TETROMINO ***");
  
   // Create and push to array of tetrominoes 
   let tetromino = new Tetromino();
