@@ -2,7 +2,9 @@ import {getRandomIntInclusive} from "./helperFunctions.js";
 export function Tetromino (gameGrid, blockSize, p5js, row, col) {
   
   console.log("****** TETROMINO CONSTRUCTOR CALLED *********");
-  
+ 
+  const colors = ["#ffeaa7", "#55efc4", "#74b9ff", "#ff7675"];
+ 
   // Default to top left corner of canvas -- first tick will move it down row 0 and draw it there!
   if (row == null) {
     this.row = -1;
@@ -17,6 +19,7 @@ export function Tetromino (gameGrid, blockSize, p5js, row, col) {
   }
   
   console.log("row and col: " + this.row + ", " + this.col);
+
   
   // Each tetromino has a random color from the (global) colors array defined for the game
   this.color = colors[getRandomIntInclusive(0, colors.length-1)];

@@ -8,7 +8,6 @@ console.log('hi');
 // Size of squares in the game, in pixels
 const blockSize = 25;
 const rows = 8, cols = 4;
-const colors = ["#ffeaa7", "#55efc4", "#74b9ff", "#ff7675"];
 
 const canvasWidth = blockSize * cols, canvasHeight = blockSize * rows;
 
