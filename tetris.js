@@ -80,23 +80,29 @@ function clearRows (completedRows, gameGrid) {
 // Pure function :)
 //    TODO: this WILL NOT work once tetrominoes come in multiple shapes, 
 //          because not all rows will need to be shifted down; only those ABOVE the removed rows!
-function updateTetrominoes(completedRows) {
+function updateTetrominoes(tetrominoes, completedRows) {
+
+      console.log("called updateTetrominoes");
+      console.log("initial tetrominoes:");
+      console.log(tetrominoes);
 
       // Filter tetrominoes array to remove any that belonged to any of completedRows,
-      // and shift down all the tetrominoes above 
       tetrominoes = tetrominoes.filter(tetromino => completedRows.indexOf(tetromino.row) === -1 );
-  
-      tetrominoes = tetrominoes.map(tetromino => {
+
+      console.log("Tetrominoes AFTER filtering in updateTetrominoes:");
+      console.log(tetrominoes); 
+
+      // And shift down all the remaining tetrominoes 
+      // and RETURN this new array as output
+      return tetrominoes.map(tetromino => {
         if (tetromino.row === -1) {
           return tetromino;
         } else {
           return {...tetromino, row: tetromino.row + 1};
         }
       });
-
-      console.log("filtered tetrominoes:");
-      console.log(tetrominoes);
 }
+
 
 
 
