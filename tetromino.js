@@ -1,4 +1,5 @@
-export function Tetromino (row, col) {
+import {getRandomIntInclusive} from "./helperFunctions.js";
+export function Tetromino (gameGrid, blockSize, p5js, row, col) {
   
   console.log("****** TETROMINO CONSTRUCTOR CALLED *********");
   
