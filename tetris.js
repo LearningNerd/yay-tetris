@@ -27,13 +27,13 @@ console.log("****** GRID CREATED *********");
 
 
 // Create a new tetromino and add to tetrominoes array
-function createTetromino () {
+function createTetromino (p5js) {
   // FOR TESTING: increase counter to identify each block
   
   console.log(" *** CREATING TETROMINO ***");
  
   // Create and push to array of tetrominoes 
-  let tetromino = new Tetromino();
+  let tetromino = new Tetromino(gameGrid, blockSize, p5js);
   tetrominoes.push(tetromino);
 
   // Update currently active tetromino (global var for now) 
@@ -114,103 +114,117 @@ function endGame() {
 // SETUP FOR P5JS DRAWING:
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-function setup() {
+// Set up p5js to run in instance mode
+// -- for now, this solves the issue of p5js not working when my main JS file has type="module"
+let p5js = new p5(p5jsInstance);
 
-  console.log("Called p5js setup()");
-  
-  // Fix for retina displays (bug: clear() only clears top left corner of canvas)
-  pixelDensity(1);
-  
-  createCanvas(canvasWidth, canvasHeight);
+function p5jsInstance ( p5js) {
 
-  // 2 frames per second, easier for testing :)
-  frameRate(2);
-  
-  // For now, run next frame on mouse click!
-  noLoop();
-  
-  // INITIALIZE THE GAME -- create the first tetromino
-  createTetromino();
-  
-}
+  // Runs once to set up the canvas element and p5js animation stuff
+  p5js.setup = function() {
 
-
-
-// Animation loop / game loop:
-function draw() {
-
-  console.log("Called p5js setup()");
- 
-  // Update coords based on which keys are currently being pressed
-  if (keyIsDown(LEFT_ARROW)) {
-   currentTetromino.moveLeft();
-   console.log("---- LEFT");
-  } else if (keyIsDown(RIGHT_ARROW)) {
-   currentTetromino.moveRight();
-   console.log("---- RIGHT");
-  }
-
-  // Clear the canvas on each frame, with a background color
-  background("lightgrey");
-  
-  console.log("Tetrominoes array:");
-  console.log(tetrominoes);
- 
-  console.log("*******************");
-  console.log("cur coords: " + currentTetromino.row + ", " + currentTetromino.col);
-  console.log("*******************");
-
-
-  // If there's room below this tetromino, let it keep falling
-  if (currentTetromino.hasRoomBelow() ) {
-    console.log("has room below!");
-    currentTetromino.moveDown();  // update position for the next tick
- 
-  // Otherwise, if the newest tetromino has no room and it's sitting above the screen, game over!
-  } else if (currentTetromino.row === -1) {
-
-    endGame();
-  
-  // Otherwise if the current tetromino has landed
-  } else {
-
-    // Check for any completed rows
-    let completedRows = getCompletedRowIndexes(gameGrid);
-
-    // If there are any, update the game grid and tetrominoes array to remove cleared rows and move down upper rows
-    if (completedRows) {
-      console.log("completedRows");
-      console.log(completedRows)
-
-      gameGrid = clearRows(completedRows, gameGrid); 
-      tetrominoes = updateTetrominoes(completedRows);
-    }
+    console.log("Called p5js setup()");
     
-    // Drop the next tetromino
-    createTetromino();
-  }
+    // Fix for retina displays (bug: clear() only clears top left corner of canvas)
+    p5js.pixelDensity(1);
+    
+    p5js.createCanvas(canvasWidth, canvasHeight);
 
-  // Draw ALL tetrominoes on each frame, AFTER updating position 
-  for (tetromino of tetrominoes) {
-  //  console.log("block num #" + tetromino.blockNum + " -- initial y: " + tetromino.y);
- 
-    tetromino.draw();
-
-  } // end for/of loop
-
-
-
-} // end draw()
-
-
-// Draw next frame when pressing any arrow key
-function keyPressed() {
-  if (keyCode === LEFT_ARROW || keyCode === RIGHT_ARROW || keyCode === UP_ARROW || keyCode === DOWN_ARROW) {
-    console.log("Key pressed!");
-    redraw();
-  }
-}
+    // 2 frames per second, easier for testing :)
+    p5js.frameRate(2);
+    
+    // For now, run next frame on mouse click!
+    p5js.noLoop();
+    
+    // INITIALIZE THE GAME -- create the first tetromino
+    createTetromino(p5js);
+    
+  }; // end p5js.setup
 
 
 
+  // Animation loop, runs once per frame
+  p5js.draw = function() {
+
+    console.log("Called p5js draw()");
+   
+    // Update coords based on which keys are currently being pressed
+    if (p5js.keyIsDown(p5js.LEFT_ARROW)) {
+     currentTetromino.moveLeft();
+     console.log("---- LEFT");
+    } else if (p5js.keyIsDown(p5js.RIGHT_ARROW)) {
+     currentTetromino.moveRight();
+     console.log("---- RIGHT");
+    }
+  
+    // Clear the canvas on each frame, with a background color
+    p5js.background("lightgrey");
+    
+    console.log("Tetrominoes array:");
+    console.log(tetrominoes);
+   
+    console.log("*******************");
+    console.log("cur coords: " + currentTetromino.row + ", " + currentTetromino.col);
+    console.log("*******************");
+  
+  
+    // If there's room below this tetromino, let it keep falling
+    if (currentTetromino.hasRoomBelow() ) {
+      console.log("has room below!");
+      currentTetromino.moveDown();  // update position for the next tick
+   
+    // Otherwise, if the newest tetromino has no room and it's sitting above the screen, game over!
+    } else if (currentTetromino.row === -1) {
+  
+      endGame();
+    
+    // Otherwise if the current tetromino has landed
+    } else {
+  
+      // Check for any completed rows
+      let completedRows = getCompletedRowIndexes(gameGrid);
+  
+      // If there are any, update the game grid and tetrominoes array to remove cleared rows and move down upper rows
+      if (completedRows.length !== 0) {
+        console.log("completedRows");
+        console.log(completedRows)
+  
+        gameGrid = clearRows(completedRows, gameGrid); 
+        tetrominoes = updateTetrominoes(tetrominoes, completedRows);
+      }
+      
+      // Drop the next tetromino
+      createTetromino(p5js);
+
+    } // end of if/elseif/else 
+
+    // Draw ALL tetrominoes on each frame, AFTER updating position 
+    tetrominoes.forEach( t => t.draw() );
+
+     /* 
+    for (x of tetrominoes) {
+   
+      x.draw();
+  
+    } // end for/of loop
+    */
+
+  }; // end p5js.draw
+
+
+
+
+  // Draw next frame when pressing any arrow key
+  p5js.keyPressed = function() {
+    if (p5js.keyCode === p5js.LEFT_ARROW || p5js.keyCode === p5js.RIGHT_ARROW || p5js.keyCode === p5js.UP_ARROW || p5js.keyCode === p5js.DOWN_ARROW) {
+      console.log("Key pressed!");
+      p5js.redraw();
+    }
+  }; // end p5js.keyPressed
+
+
+  
+
+
+} // end p5jsInstance
 

@@ -33,8 +33,8 @@ export function Tetromino (gameGrid, blockSize, p5js, row, col) {
     let xPos = this.col * blockSize;
     let yPos = this.row * blockSize;
    
-    fill(this.color); 
-    rect(xPos, yPos, blockSize, blockSize);
+    p5js.fill(this.color); 
+    p5js.rect(xPos, yPos, blockSize, blockSize);
   };
   
   // NOTE: moveDown should be called on every "tick" of game loop,
