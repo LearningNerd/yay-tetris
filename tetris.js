@@ -182,6 +182,15 @@ let p5js = new p5(p5jsInstance);
 
 function p5jsInstance ( p5js) {
 
+  // Params for drawing:
+  
+  // Size of squares in the game, in pixels
+  const blockSize = 25;
+  
+  const canvasWidth = blockSize * cols, canvasHeight = blockSize * rows;
+  
+
+
   // Runs once to set up the canvas element and p5js animation stuff
   p5js.setup = function() {
 
@@ -204,6 +213,9 @@ function p5jsInstance ( p5js) {
   }; // end p5js.setup
 
 
+
+/*
+*********************** START OF PREV DRAW FUNCTION *********************
 
   // Animation loop, runs once per frame
   p5js.draw = function() {
@@ -263,15 +275,48 @@ function p5jsInstance ( p5js) {
     // Draw ALL tetrominoes on each frame, AFTER updating position 
     tetrominoes.forEach( t => t.draw() );
 
-     /* 
     for (x of tetrominoes) {
    
       x.draw();
   
     } // end for/of loop
-    */
 
   }; // end p5js.draw
+
+*********************** END OF PREV DRAW FUNCTION *********************
+*/
+
+  // FOR TESTING UPDATE WITH REAL TETROMINOES:
+  p5js.draw = function() {
+
+    // Clear the canvas on each frame, with a background color
+    p5js.background("lightgrey");
+    
+    console.log("squares array:");
+    console.log(squares);
+   
+    // ********** TO DO: CALL gameTickLoop,
+    // which exports array of squares; then draw them as below:
+
+
+    // Draw ALL tetromino squares on each frame
+    squares.forEach( s => {
+      // Use drawing params to draw each square
+  console.log(s); 
+  
+    // Actual coordinates for drawing: multiple row/col by the blockSize (pixel value)
+    let xPos = s.col * blockSize;
+    let yPos = s.row * blockSize;
+   
+    p5js.fill(s.color); 
+    p5js.rect(xPos, yPos, blockSize, blockSize);
+  });
+  
+
+
+
+  }; // end updated p5js draw()
+
 
 
 
