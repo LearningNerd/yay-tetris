@@ -3,18 +3,68 @@ import {Tetromino} from "./tetromino.js"
 
 console.log('hi');
 
-// Params for drawing:
 
-// Size of squares in the game, in pixels
-const blockSize = 25;
+/*  PLANNING
+
+Tetromino:
+  - color
+  - shape
+  - squares: array of square objects
+  - moveDown, moveLeft, moveRight -- CHANGE: only update row/col
+
+Square:
+  - row
+  - col
+  - color
+
+Game:
+  - gameGrid
+  - squares -- array of all squares on the board 
+    --- OR just an array of squares??
+  - currentTetromino
+  - nextMove (left, right, or only down)
+
+  - createTetromino -- new tetromino, add squares to list of squares, update the current tetromino
+
+  - getCompletedRowIndexes -- input: gameGrid; output: array of row indexes to delete
+
+  - clearRows -- gameGrid, completedRowIndexes; output: new gameGrid
+    -- delete rows in gameGrid, add empty rows at the top, effectively shifting down all remaining rows. ***will need to change this!
+
+  - updateTetrominoes -- CHANGE: update squares array, remove those from completedRowIndexes; and shift down square.row for remaining squares. ***will need to change this too! 
+
+  - hasRoomForNextMove -- input: array of current tetromino's squares, gameGrid; output: true OR false (false if the move would cause a collision)
+  
+  - updateGameGrid -- input: array of current tetromino's squares (after calling hasRoom, updateTetrominoes, etcetc, gameGrid; output: new gameGrid 
+
+  - endGame -- display message
+
+  - gameLoopTick -- run once every animation frame in p5js, output array of squares to be drawn -- MOVE ALL GAME LOGIC TO HERE!
+
+  - updateNextMove -- input: left/right. update this.NextMove, to be used by other function calls ... ??
+ 
+    *** always do currentTetromino.moveDown, if there's room! optionally, move left/right AND down ***will change this behavior later? call hasRoom, updateGameGrid, updateTetrominoes
+
+
+User Interface (p5js drawing):
+  - setup
+    -- drawing params initialized here
+    -- create game object
+
+  - draw
+    -- detect which key is pressed, call game.moveLeft/Right 
+    -- run gameLoopTick, get array of  squares output. convert row/col/color to drawing rectangles at the proper coordinates 
+ 
+  - keypressed
+    -- for now: draw next frame
+
+*/
+
+
+
+// Size of the game:
 const rows = 8, cols = 4;
-
-const canvasWidth = blockSize * cols, canvasHeight = blockSize * rows;
-
-
-
-// ..... data, blocks?
-let tetrominoes = [];
+let squares = [];
 let currentTetromino;
 
 // Generate 2D array based on rows / cols, each element populated with 0s
