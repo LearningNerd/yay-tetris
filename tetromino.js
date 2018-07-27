@@ -1,42 +1,85 @@
 import {getRandomIntInclusive} from "./helperFunctions.js";
-export function Tetromino (gameGrid, blockSize, p5js, row, col) {
-  
+import {Square} from "./square.js";
+
+export function Tetromino (row, col, gameGrid, blockSize) {
+
   console.log("****** TETROMINO CONSTRUCTOR CALLED *********");
+
+  console.log(row + ", " + col);
  
   const colors = ["#ffeaa7", "#55efc4", "#74b9ff", "#ff7675"];
  
-  // Default to top left corner of canvas -- first tick will move it down row 0 and draw it there!
-  if (row == null) {
-    this.row = -1;
-  } else {
-    this.row = row;
-  }
+  const shapes = {
+    O: [
+      [1,1],
+      [1,1]
+    ],
   
-  if (col == null) {
-    this.col = 0;
-  } else {
-    this.col = col;
-  }
+    I: [[1,1,1,1]],
   
-  console.log("row and col: " + this.row + ", " + this.col);
+    T: [
+      [1,0],
+      [1,1],
+      [1,0]
+    ],
+  
+    L: [   // NOTE: shapeJ is the reflection of shapeL
+      [1,0],
+      [1,0],
+      [1,1]
+    ],
+  
+    S: [   // NOTE: shapeZ is the reflection of shapeS
+      [1,0],
+      [1,1],
+      [0,1]
+    ]
+  };
 
-  
+
+  // ******TODO: randomize which shape.
+  // For now, hard-coded to test them:
+  let shapeType = "S";
+
+  this.shape = shapes[shapeType];
+
   // Each tetromino has a random color from the (global) colors array defined for the game
   this.color = colors[getRandomIntInclusive(0, colors.length-1)];
 
+  // ****TODO: set default row/col starting pos (middle of canvas?)
+  this.topLeftRow = row;
+  this.topLeftCol = col;
+
+  console.log(this.topLeftRow + ", " + this.topLeftCol);
+
+  // Based on one of the shapes above, generate a flat array of Square objects with coordinates relative to topLeftRow, topLeftCol for top-left of Tetromino
+  this.squares = this.shape.map( (row, rowIndex) => {
+    return row.map ( (square, colIndex) => {
+      if (square) { // if this is a 1
+        return new Square(this.topLeftRow + rowIndex, this.topLeftCol + colIndex, this.color);
+      }
+    }).filter(elem => elem != undefined);
+
+  }).reduce( (accum, elem) => {
+     return accum.concat(elem);
+  }, []);
+
+
+
   // To see the grid in console:
-    //gameGrid.forEach(row => console.log(row));
-  
-  this.draw = function() {
-        
-    // Actual coordinates for drawing: multiple row/col by the blockSize (pixel value)
-    let xPos = this.col * blockSize;
-    let yPos = this.row * blockSize;
-   
-    p5js.fill(this.color); 
-    p5js.rect(xPos, yPos, blockSize, blockSize);
+  this.print = function() {
+   let stringGrid = this.shape.reduce( (str, row) => {
+      return str += row.join(" ") + "\n"
+    }, "\n");
+    console.log(stringGrid);
   };
   
+
+    // To see the grid in console:
+    //gameGrid.forEach(row => console.log(row));
+ 
+
+
   // NOTE: moveDown should be called on every "tick" of game loop,
   // but calling moveLeft or moveRight should instantly redraw... I think?
   // But, leaving that for later.

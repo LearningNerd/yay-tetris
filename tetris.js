@@ -26,18 +26,24 @@ console.log("****** GRID CREATED *********");
 
 
 
-// Create a new tetromino and add to tetrominoes array
-function createTetromino (p5js) {
-  // FOR TESTING: increase counter to identify each block
+// Create a new tetromino and add to squares array
+function createTetromino (row, col) {
   
   console.log(" *** CREATING TETROMINO ***");
- 
-  // Create and push to array of tetrominoes 
-  let tetromino = new Tetromino(gameGrid, blockSize, p5js);
-  tetrominoes.push(tetromino);
+  console.log(row + ", " + col);
+  
+  // Create and merge new squares with squares array
+  let tetromino = new Tetromino(row, col, gameGrid, 25);
+
+  console.log(tetromino.squares);
+
+  squares = squares.concat(tetromino.squares);
+
+  console.log(squares);
+
 
   // Update currently active tetromino (global var for now) 
-  currentTetromino = tetrominoes[tetrominoes.length - 1]; 
+  currentTetromino = tetromino;
 }
 
 
@@ -143,7 +149,7 @@ function p5jsInstance ( p5js) {
     p5js.noLoop();
     
     // INITIALIZE THE GAME -- create the first tetromino
-    createTetromino(p5js);
+    createTetromino(0,1);
     
   }; // end p5js.setup
 
