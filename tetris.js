@@ -1,9 +1,6 @@
 // import {p5} from "./node_modules/p5/lib/p5.min.js"
 import {Tetromino} from "./tetromino.js"
 
-console.log('hi');
-
-
 /*
 
 Game:
@@ -34,117 +31,117 @@ Game:
  
 */
 
+export function Tetris () {
 
-
-// Size of the game:
-const rows = 8, cols = 4;
-let squares = [];
-let currentTetromino;
-
-// Generate 2D array based on rows / cols, each element populated with 0s
-let gameGrid = new Array(rows).fill(null).map(row => new Array(cols).fill(0));
-
-console.log("****** GRID CREATED *********");
-// To see the grid in console:
-// gameGrid.forEach(row => console.log(row));
-
-
-
-// Create a new tetromino and add to squares array
-function createTetromino (row, col) {
+  // Size of the game:
+  const rows = 8, cols = 4;
+  let squares = [];
+  let currentTetromino;
   
-  console.log(" *** CREATING TETROMINO ***");
-  console.log(row + ", " + col);
+  // Generate 2D array based on rows / cols, each element populated with 0s
+  let gameGrid = new Array(rows).fill(null).map(row => new Array(cols).fill(0));
   
-  // Create and merge new squares with squares array
-  let tetromino = new Tetromino(row, col, gameGrid, 25);
-
-  console.log(tetromino.squares);
-
-  squares = squares.concat(tetromino.squares);
-
-  console.log(squares);
+  console.log("****** GRID CREATED *********");
+  // To see the grid in console:
+  // gameGrid.forEach(row => console.log(row));
+ 
 
 
-  // Update currently active tetromino (global var for now) 
-  currentTetromino = tetromino;
-}
-
-
-// PURE FUNCTION -- given a gameGrid, return array of row indexes that have been completed
-// TO REFACTOR: this should probably belong to the game or gameGrid object
-function getCompletedRowIndexes (gameGrid) {
-
-  console.log("called getCompletedRowIndexes");
-
-  return gameGrid.map ( (row, index) => {
-    let rowSum = row.reduce( (square,sum) => sum + square);
-     
-    if (rowSum === row.length) {
-      return index;
-    }
-  }).filter(row => row != undefined); 
-
-}
-
-// Return a new gameGrid with all completed rows cleared and new empty rows added to the top
-// Pure function :)
-function clearRows (completedRows, gameGrid) {
-
-  // ALSO TODO: INCREASE SCORE FOR EACH COMPLETED ROW
-
-  console.log("called clearRows");
-
-  let newGameGrid = Array.from(gameGrid);
-
-  completedRows.forEach( rowIndex => {
-    newGameGrid.splice(rowIndex, 1);
-    // NOTE: shouldn't be using global cols var here:
-    newGameGrid.unshift( new Array(4).fill(0) );
-  });
-
-  return newGameGrid;
-}
-
-// Remove and shift down tetrominoes as needed after rows have been completed.
-// Pure function :)
-//    TODO: this WILL NOT work once tetrominoes come in multiple shapes, 
-//          because not all rows will need to be shifted down; only those ABOVE the removed rows!
-function updateTetrominoes(tetrominoes, completedRows) {
-
-      console.log("called updateTetrominoes");
-      console.log("initial tetrominoes:");
-      console.log(tetrominoes);
-
-      // Filter tetrominoes array to remove any that belonged to any of completedRows,
-      tetrominoes = tetrominoes.filter(tetromino => completedRows.indexOf(tetromino.row) === -1 );
-
-      console.log("Tetrominoes AFTER filtering in updateTetrominoes:");
-      console.log(tetrominoes); 
-
-      // And shift down all the remaining tetrominoes 
-      // and RETURN this new array as output
-      return tetrominoes.map(tetromino => {
-        if (tetromino.row === -1) {
-          return tetromino;
-        } else {
-          return {...tetromino, row: tetromino.row + 1};
-        }
-      });
-}
-
-
-
-
-
-// Later: a nicer "game over" screen
-function endGame() {
-  console.log("Game over!");
+  // Create a new tetromino and add to squares array
+  this.createTetromino  = function (row, col) {
+    
+    console.log(" *** CREATING TETROMINO ***");
+    console.log(row + ", " + col);
+    
+    // Create and merge new squares with squares array
+    let tetromino = new Tetromino(row, col, gameGrid, 25);
   
-  let x = document.body.innerHTML;  
-  document.body.innerHTML = x + " <h1>Game over!</h1>"; 
+    console.log(tetromino.squares);
+  
+    squares = squares.concat(tetromino.squares);
+  
+    console.log(squares);
+  
+  
+    // Update currently active tetromino (global var for now) 
+    currentTetromino = tetromino;
+  }
+  
+  
+  // PURE FUNCTION -- given a gameGrid, return array of row indexes that have been completed
+  // TO REFACTOR: this should probably belong to the game or gameGrid object
+  this.getCompletedRowIndexes  = function (gameGrid) {
+  
+    console.log("called getCompletedRowIndexes");
+  
+    return gameGrid.map ( (row, index) => {
+      let rowSum = row.reduce( (square,sum) => sum + square);
+       
+      if (rowSum === row.length) {
+        return index;
+      }
+    }).filter(row => row != undefined); 
+  
+  }
+  
+  // Return a new gameGrid with all completed rows cleared and new empty rows added to the top
+  // Pure function :)
+  this.clearRows  = function (completedRows, gameGrid) {
+  
+    // ALSO TODO: INCREASE SCORE FOR EACH COMPLETED ROW
+  
+    console.log("called clearRows");
+  
+    let newGameGrid = Array.from(gameGrid);
+  
+    completedRows.forEach( rowIndex => {
+      newGameGrid.splice(rowIndex, 1);
+      // NOTE: shouldn't be using global cols var here:
+      newGameGrid.unshift( new Array(4).fill(0) );
+    });
+  
+    return newGameGrid;
+  }
+  
+  // Remove and shift down tetrominoes as needed after rows have been completed.
+  // Pure function :)
+  //    TODO: this WILL NOT work once tetrominoes come in multiple shapes, 
+  //          because not all rows will need to be shifted down; only those ABOVE the removed rows!
+  this.updateTetrominoes = function (tetrominoes, completedRows) {
+  
+    console.log("called updateTetrominoes");
+    console.log("initial tetrominoes:");
+    console.log(tetrominoes);
+  
+    // Filter tetrominoes array to remove any that belonged to any of completedRows,
+    tetrominoes = tetrominoes.filter(tetromino => completedRows.indexOf(tetromino.row) === -1 );
+  
+    console.log("Tetrominoes AFTER filtering in updateTetrominoes:");
+    console.log(tetrominoes); 
+  
+    // And shift down all the remaining tetrominoes 
+    // and RETURN this new array as output
+    return tetrominoes.map(tetromino => {
+      if (tetromino.row === -1) {
+        return tetromino;
+      } else {
+        return {...tetromino, row: tetromino.row + 1};
+      }
+    });
+  }
+  
+  // Later: a nicer "game over" screen
+  this.endGame = function () {
+    console.log("Game over!");
+    
+    let x = document.body.innerHTML;  
+    document.body.innerHTML = x + " <h1>Game over!</h1>"; 
+  
+  };
+  
+}; // end Tetris() constructor
 
-}
+
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // SETUP FOR P5JS DRAWING:
