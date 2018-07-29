@@ -46,6 +46,15 @@ export function Tetris () {
   // gameGrid.forEach(row => console.log(row));
  
 
+ 
+  // To see the grid in console:
+  this.print = function() {
+   let stringGrid = gameGrid.reduce( (str, row) => {
+      return str += row.join(" ") + "\n";
+    }, "\n");
+    console.log(stringGrid);
+  };
+  
 
   // Create a new tetromino and add to squares array
   this.createTetromino  = function (row, col) {
