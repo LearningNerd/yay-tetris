@@ -63,7 +63,7 @@ export function Tetris () {
     console.log(row + ", " + col);
     
     // Create and merge new squares with squares array
-    let tetromino = new Tetromino(row, col, gameGrid, 25);
+    let tetromino = new Tetromino(row, col);
   
     console.log(tetromino.squares);
   
@@ -78,7 +78,6 @@ export function Tetris () {
   
   
   // PURE FUNCTION -- given a gameGrid, return array of row indexes that have been completed
-  // TO REFACTOR: this should probably belong to the game or gameGrid object
   this.getCompletedRowIndexes  = function (gameGrid) {
   
     console.log("called getCompletedRowIndexes");
