@@ -4,18 +4,7 @@ import {Tetromino} from "./tetromino.js"
 console.log('hi');
 
 
-/*  PLANNING
-
-Tetromino:
-  - color
-  - shape
-  - squares: array of square objects
-  - moveDown, moveLeft, moveRight -- CHANGE: only update row/col
-
-Square:
-  - row
-  - col
-  - color
+/*
 
 Game:
   - gameGrid
@@ -43,21 +32,6 @@ Game:
 
   - updateNextMove -- input: left/right. update this.NextMove, to be used by other function calls ... ??
  
-    *** always do currentTetromino.moveDown, if there's room! optionally, move left/right AND down ***will change this behavior later? call hasRoom, updateGameGrid, updateTetrominoes
-
-
-User Interface (p5js drawing):
-  - setup
-    -- drawing params initialized here
-    -- create game object
-
-  - draw
-    -- detect which key is pressed, call game.moveLeft/Right 
-    -- run gameLoopTick, get array of  squares output. convert row/col/color to drawing rectangles at the proper coordinates 
- 
-  - keypressed
-    -- for now: draw next frame
-
 */
 
 
@@ -175,6 +149,24 @@ function endGame() {
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // SETUP FOR P5JS DRAWING:
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+/*
+
+User Interface (p5js drawing):
+  - setup
+    -- drawing params initialized here
+    -- create game object
+
+  - draw
+    -- detect which key is pressed, call game.moveLeft/Right 
+    -- run gameLoopTick, get array of  squares output. convert row/col/color to drawing rectangles at the proper coordinates 
+ 
+  - keypressed
+    -- for now: draw next frame
+
+*/
+
+
 
 // Set up p5js to run in instance mode
 // -- for now, this solves the issue of p5js not working when my main JS file has type="module"

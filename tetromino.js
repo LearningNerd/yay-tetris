@@ -1,6 +1,17 @@
 import {getRandomIntInclusive} from "./helperFunctions.js";
 import {Square} from "./square.js";
 
+
+/*
+Tetromino:
+  - color
+  - shape
+  - squares: array of square objects
+  - moveDown, moveLeft, moveRight -- CHANGE: only update row/col
+
+*/
+
+
 export function Tetromino (row, col, gameGrid, blockSize) {
 
   console.log("****** TETROMINO CONSTRUCTOR CALLED *********");
