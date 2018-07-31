@@ -46,8 +46,9 @@ export function Tetris (rows, cols) {
 
  
   // To see the grid in console:
-  this.print = function() {
-   let stringGrid = gameGrid.reduce( (str, row) => {
+  this.print = function(gameGrid) {
+    let grid = [...gameGrid];
+    let stringGrid = grid.reduce( (str, row) => {
       return str += row.join(" ") + "\n";
     }, "\n");
     console.log(stringGrid);
@@ -64,6 +65,10 @@ export function Tetris (rows, cols) {
 
     // **** this is super incomplete and wrong =P
 
+    console.log("gameGrid before updating:");
+    this.print(gameGrid);
+
+
     if (this.hasRoomForNextMove(currentTetromino) ) {
       
       // Get updated tetromino object with updates squares array
@@ -72,6 +77,10 @@ export function Tetris (rows, cols) {
       // gameGrid = updateGameGrid(prevSquares, currentTetromino.squares, gameGrid); 
 
     }
+
+    console.log("gameGrid after updating:");
+    this.print(gameGrid);
+
 
     // *** Need to update the gameGrid and new squares array after movement
 
