@@ -70,11 +70,13 @@ export function Tetris (rows, cols) {
 
 
     if (this.hasRoomForNextMove(currentTetromino) ) {
-      
-      // Get updated tetromino object with updates squares array
+
+      let prevSquares = currentTetromino.squares;
+
+      // Get updated tetromino object with updated squares array
       currentTetromino = currentTetromino.move();
 
-      // gameGrid = updateGameGrid(prevSquares, currentTetromino.squares, gameGrid); 
+      gameGrid = this.updateGameGrid(prevSquares, currentTetromino.squares, gameGrid); 
 
     }
 
@@ -161,34 +163,32 @@ export function Tetris (rows, cols) {
   }; // end hasRoomForNextMove()
   
 
-/*
-    // If there's an empty square where this tetromino wants to move
-    if (gameGrid[currentTetromino.row] && gameGrid[currentTetromino.row + 1][currentTetromino.col] === 0) {
+  // Return updated game grid after switching squares on/off based on prev and next coords
+  // TODO: update based on completed rows too, if any
+  // TODO: pass in nextMove param ???
+  this.updateGameGrid = function(prevSquares, newSquares, gameGrid) {
+    console.log("called updateGameGrid");
 
-      let prevRow = currentTetromino.row;
-      let prevCol = currentTetromino.col;
+    // Modify a copy of previous gameGrid, return new array instead of mutating
+    let newGameGrid = [...gameGrid];
 
-      console.log("prev coords: " + prevRow + ", " + prevCol);
-    
-      return true; 
-/*  
+    // Switch off previous coordinates for each square:
+    for (let prevSquare of prevSquares) {
       // Only switch off previous position if this tetromino is already on the screen
-      if (prevRow >= 0) {
-        gameGrid[prevRow][prevCol] = 0;
+      if (prevSquare.row >= 0) {
+        newGameGrid[prevSquare.row][prevSquare.col] = 0;
       }
 
-      // Switch on new position to the side (and shortly after, moveDown will update position down!)
-      gameGrid[this.row][this.col] = 1;
-  
-      console.log("new coords: " + this.row + ", " + this.col);
-    
-    } else {
-      console.log("No room!!!!!");
-      return false;
+    } 
+
+    // Switch on new coordinates for each square:
+    for (let newSquare of newSquares) {
+      newGameGrid[newSquare.row][newSquare.col] = 1;
     }
 
-*/
+    return newGameGrid;
 
+  }; // end updateGameGrid()
 
 
 
