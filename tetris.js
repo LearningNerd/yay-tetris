@@ -17,7 +17,7 @@ Game:
   - clearRows -- gameGrid, completedRowIndexes; output: new gameGrid
     -- delete rows in gameGrid, add empty rows at the top, effectively shifting down all remaining rows. ***will need to change this!
 
-  - updateTetrominoes -- CHANGE: update squares array, remove those from completedRowIndexes; and shift down square.row for remaining squares. ***will need to change this too! 
+  - updateSquares -- CHANGE: update squares array, remove those from completedRowIndexes; .... 
 
   - hasRoomForNextMove -- input: array of current tetromino's squares, gameGrid; output: true OR false (false if the move would cause a collision)
   
@@ -33,7 +33,7 @@ Game:
 
 export function Tetris (rows, cols) {
 
-  let squares = [];
+  let fallenSquares = [];
   let currentTetromino;
   
   // Generate 2D array based on rows / cols, each element populated with 0s
@@ -65,7 +65,12 @@ export function Tetris (rows, cols) {
     // **** this is super incomplete and wrong =P
 
     if (this.hasRoomForNextMove(currentTetromino) ) {
-      squares = currentTetromino.move();
+      
+      // Get updated tetromino object with updates squares array
+      currentTetromino = currentTetromino.move();
+
+      // gameGrid = updateGameGrid(prevSquares, currentTetromino.squares, gameGrid); 
+
     }
 
     // *** Need to update the gameGrid and new squares array after movement
@@ -100,8 +105,8 @@ export function Tetris (rows, cols) {
 
    */
 
-
-    return squares;
+    // Return all squares in the game to be drawn on each frame:
+    return [...fallenSquares, ...currentTetromino.squares];
   }; 
 
 
@@ -143,6 +148,8 @@ export function Tetris (rows, cols) {
     // If all the squares have room below, return true:
     return true;
 
+  }; // end hasRoomForNextMove()
+  
 
 /*
     // If there's an empty square where this tetromino wants to move
@@ -171,10 +178,6 @@ export function Tetris (rows, cols) {
     }
 
 */
-  }; // end hasRoomForNextMove()
-  
-
-
 
 
 
@@ -187,9 +190,6 @@ export function Tetris (rows, cols) {
     
     // Create and merge new squares with squares array
     let tetromino = new Tetromino(row, col);
-  
-    squares = squares.concat(tetromino.squares);
-    console.log(squares);
   
     // Update currently active tetromino (global var for now) 
     currentTetromino = tetromino;

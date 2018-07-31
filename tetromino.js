@@ -92,27 +92,17 @@ console.log(this.shape);
  
     // MOVE DOWN:
 
-  this.squares = this.squares.map( square => {
+    this.squares = this.squares.map( square => {
       return {row: square.row + 1, col: square.col, color: square.color};
-  });
-
-  console.log("new:");
-  console.log(this.squares); 
-
-  // return new squares array:
-  return this.squares;   
- 
+    });
+  
+    console.log("new:");
+    console.log(this.squares); 
+  
+    // return this tetromino object (with updated squares array):
+    return this;
+   
   }; // end this.move()
-  
-  
-  this.moveLeft = function() {
-  
-  };
-  
-
-  this.moveRight = function() {
-
-  };
   
   
 } //end Tetromino constructor
