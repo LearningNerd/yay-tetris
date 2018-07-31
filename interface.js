@@ -50,14 +50,15 @@ function p5jsInstance ( p5js) {
     p5js.noLoop();
     
     // Create the first tetromino
-    tetris.createTetromino(0,1);
+    tetris.createTetromino(-1,1);
     
   }; // end p5js.setup
 
 
   // FOR TESTING UPDATE WITH REAL TETROMINOES:
   p5js.draw = function() {
-
+    console.log("called draw()");
+    
     // Clear the canvas on each frame, with a background color
     p5js.background("lightgrey");
 

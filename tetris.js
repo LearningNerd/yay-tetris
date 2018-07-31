@@ -54,11 +54,60 @@ export function Tetris (rows, cols) {
   };
  
   this.gameLoopTick = function() {
+    console.log("called gameLoopTick");
     // Run the game logic to update on each tick
+   
+    // For now, just move the tetromino down on every tick. and for now, no params for move():
+
+
+    console.log(currentTetromino);
+
+    // **** this is super incomplete and wrong =P
+    squares = currentTetromino.move();
+
+    // *** Need to update the gameGrid and new squares array after movement
+
+ 
+
+    /*
+    // Pretend code, what this might look like when completed:
     //
-    // For now, just return squares array:
+
+    if (hasRoomForNextMove() ) {
+
+      gameGrid = updateGameGrid(gameGrid);
+      squares = updateSquares(squares);
+    }
+
+
+    let completedRows = getCompletedRows(gameGrid);
+      
+    if (completedRows) {
+        gameGrid = clearRows(completedRows, gameGrid);
+        squares = updateSquares(squares, completedRows);
+    }    
+
+    // Pseudocode:
+    // 1. Based on the next move (down, right, or left),
+    //    check if hasRoomForNextMove
+    // 2. If there's room, move the tetromino
+    // 3. Then check if this completes a row
+    // 4. If so, clear the rows and shift down the
+    //    rows above.
+
+   */
+
+
     return squares;
   }; 
+
+
+
+  
+
+
+
+
 
   // Create a new tetromino and add to squares array
   this.createTetromino  = function (row, col) {

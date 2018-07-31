@@ -7,8 +7,7 @@ Tetromino:
   - color
   - shape
   - squares: array of square objects
-  - moveDown, moveLeft, moveRight -- CHANGE: only update row/col
-
+  - move (down, down/left, down/right)
 */
 
 
@@ -79,24 +78,31 @@ console.log(this.shape);
   }, []);
 
 
-   
-  // NOTE: moveDown should be called on every "tick" of game loop,
-  // but calling moveLeft or moveRight should instantly redraw... I think?
-  // But, leaving that for later.
-  this.moveDown = function() {
-    console.log("called moveDown");
-    
-    let prevRow = this.row;
-    let prevCol = this.col;
+  // *** params: "down", "downleft", "downright" for now
+  this.move = function() {
+    console.log("called move");
+
+    // Get top left coordinate    
+    let prevRow = this.squares[0].row;
+    let prevCol = this.squares[0].col;
 
     
     console.log("prev coords: " + prevRow + ", " + prevCol);
-    
-    this.row++;
-    
-    console.log("new coords: " + this.row + ", " + this.col);
-    
-  };
+    console.log(this.squares);   
+ 
+    // MOVE DOWN:
+
+  this.squares = this.squares.map( square => {
+      return {row: square.row + 1, col: square.col, color: square.color};
+  });
+
+  console.log("new:");
+  console.log(this.squares); 
+
+  // return new squares array:
+  return this.squares;   
+ 
+  }; // end this.move()
   
   
   this.moveLeft = function() {
