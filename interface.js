@@ -50,7 +50,7 @@ function p5jsInstance ( p5js) {
     p5js.noLoop();
     
     // Create the first tetromino
-    tetris.createTetromino(-1,1);
+    tetris.createTetromino(-1,0);
     
   }; // end p5js.setup
 

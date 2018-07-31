@@ -63,7 +63,10 @@ export function Tetris (rows, cols) {
     console.log(currentTetromino);
 
     // **** this is super incomplete and wrong =P
-    squares = currentTetromino.move();
+
+    if (this.hasRoomForNextMove(currentTetromino) ) {
+      squares = currentTetromino.move();
+    }
 
     // *** Need to update the gameGrid and new squares array after movement
 
@@ -103,7 +106,74 @@ export function Tetris (rows, cols) {
 
 
 
+  // Return true if there's room for the next move
+  // FOR NOW, ONLY CHECKING BELOW BLOCK (not left or right) 
+  this.hasRoomForNextMove = function(currentTetromino) {
+    console.log("called hasRoomForNextMove");
+
+    // Get this tetromino's bottom-most squares.
+    // First get the highest row value:
+    let bottomRowValue = currentTetromino.squares.reduce( (highestValue, square) => {
+      return Math.max(square.row, highestValue);
+    }, -1);
+    // *** IMPORTANT NOTE: start by comparing to -1, because tetrominoes start at row -1 when created,
+    // because p5js calls the draw() function once on page load first, before advancing the frames,
+    // so by starting at row -1, it appears at row 0 once the page is visible.
+
+    console.log("bottom row value: " + bottomRowValue);
+
+    let bottomSquares = currentTetromino.squares.filter( square => {
+      console.log("this square's row: " + square.row + " // bottomRow val: " + bottomRowValue);
+      console.log(square.row >= bottomRowValue);
+      return square.row >= bottomRowValue;
+    });
+    console.log(bottomSquares);
+
+    // Check below each bottom square:
+    for (let s of bottomSquares) {
+      
+      if (!gameGrid[s.row + 1] || gameGrid[s.row + 1][s.col] !== 0) {
+        console.log("Square at " + s.row + ", " + s.col + " does NOT have room below.");
+        return false;
+      }
+
+    }
+
+    console.log("All squares have room below!");
+    // If all the squares have room below, return true:
+    return true;
+
+
+/*
+    // If there's an empty square where this tetromino wants to move
+    if (gameGrid[currentTetromino.row] && gameGrid[currentTetromino.row + 1][currentTetromino.col] === 0) {
+
+      let prevRow = currentTetromino.row;
+      let prevCol = currentTetromino.col;
+
+      console.log("prev coords: " + prevRow + ", " + prevCol);
+    
+      return true; 
+/*  
+      // Only switch off previous position if this tetromino is already on the screen
+      if (prevRow >= 0) {
+        gameGrid[prevRow][prevCol] = 0;
+      }
+
+      // Switch on new position to the side (and shortly after, moveDown will update position down!)
+      gameGrid[this.row][this.col] = 1;
   
+      console.log("new coords: " + this.row + ", " + this.col);
+    
+    } else {
+      console.log("No room!!!!!");
+      return false;
+    }
+
+*/
+  }; // end hasRoomForNextMove()
+  
+
 
 
 
