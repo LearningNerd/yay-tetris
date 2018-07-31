@@ -18,32 +18,37 @@ export function Tetromino (row, col) {
 
   const colors = ["#ffeaa7", "#55efc4", "#74b9ff", "#ff7675"];
  
-  const shapes = {
-    O: [
+  const shapes = [
+    // "O" shape:
+    [
       [1,1],
       [1,1]
     ],
   
-    I: [[1,1,1,1]],
+    // "I" shape:
+    [[1,1,1,1]],
   
-    T: [
+    // "T" shape:
+    [
       [1,0],
       [1,1],
       [1,0]
     ],
-  
-    L: [   // NOTE: shapeJ is the reflection of shapeL
+
+    // "L" shape (reflection of "J" shape)  
+    [  
       [1,0],
       [1,0],
       [1,1]
     ],
-  
-    S: [   // NOTE: shapeZ is the reflection of shapeS
+ 
+    // "S" shape (reflection of "Z" shape) 
+    [   // NOTE: shapeZ is the reflection of shapeS
       [1,0],
       [1,1],
       [0,1]
     ]
-  };
+  ];
 
 
   // ****TODO: set default row/col starting pos (middle of canvas?)
@@ -52,15 +57,12 @@ export function Tetromino (row, col) {
 
   console.log(this.topLeftRow + ", " + this.topLeftCol);
 
+  // Assign a random shape to each new tetromino
+  this.shape = shapes[getRandomIntInclusive(0, shapes.length-1)];
 
-  // ******TODO: randomize which shape.
-  // For now, hard-coded to test them:
-  let shapeType = "S";
+console.log(this.shape);
 
-  this.shape = shapes[shapeType];
-
-
-  // Each tetromino has a random color from the (global) colors array defined for the game
+  // Each new tetromino has a random color
   this.color = colors[getRandomIntInclusive(0, colors.length-1)];
 
 
