@@ -60,7 +60,7 @@ export function Tetris (rows, cols) {
     // For now, just move the tetromino down on every tick. and for now, no params for move():
 
 
-    console.log(currentTetromino);
+    // console.log(currentTetromino);
 
     // **** this is super incomplete and wrong =P
 
@@ -125,26 +125,27 @@ export function Tetris (rows, cols) {
     // because p5js calls the draw() function once on page load first, before advancing the frames,
     // so by starting at row -1, it appears at row 0 once the page is visible.
 
-    console.log("bottom row value: " + bottomRowValue);
+    // console.log("bottom row value: " + bottomRowValue);
 
     let bottomSquares = currentTetromino.squares.filter( square => {
-      console.log("this square's row: " + square.row + " // bottomRow val: " + bottomRowValue);
-      console.log(square.row >= bottomRowValue);
+      // console.log("this square's row: " + square.row + " // bottomRow val: " + bottomRowValue);
+      // console.log(square.row >= bottomRowValue);
       return square.row >= bottomRowValue;
     });
-    console.log(bottomSquares);
+    
+    // console.log(bottomSquares);
 
     // Check below each bottom square:
     for (let s of bottomSquares) {
       
       if (!gameGrid[s.row + 1] || gameGrid[s.row + 1][s.col] !== 0) {
-        console.log("Square at " + s.row + ", " + s.col + " does NOT have room below.");
+        // console.log("Square at " + s.row + ", " + s.col + " does NOT have room below.");
         return false;
       }
 
     }
 
-    console.log("All squares have room below!");
+    // console.log("All squares have room below!");
     // If all the squares have room below, return true:
     return true;
 
@@ -185,8 +186,8 @@ export function Tetris (rows, cols) {
   // Create a new tetromino and add to squares array
   this.createTetromino  = function (row, col) {
     
-    console.log(" *** CREATING TETROMINO ***");
-    console.log(row + ", " + col);
+    // console.log(" *** CREATING TETROMINO ***");
+    // console.log(row + ", " + col);
     
     // Create and merge new squares with squares array
     let tetromino = new Tetromino(row, col);

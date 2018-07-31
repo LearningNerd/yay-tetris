@@ -54,12 +54,12 @@ export function Tetromino (row, col) {
   this.topLeftRow = row;
   this.topLeftCol = col;
 
-  console.log(this.topLeftRow + ", " + this.topLeftCol);
+  // console.log(this.topLeftRow + ", " + this.topLeftCol);
 
   // Assign a random shape to each new tetromino
   this.shape = shapes[getRandomIntInclusive(0, shapes.length-1)];
 
-console.log(this.shape);
+  // console.log(this.shape);
 
   // Each new tetromino has a random color
   this.color = colors[getRandomIntInclusive(0, colors.length-1)];
@@ -87,8 +87,8 @@ console.log(this.shape);
     let prevCol = this.squares[0].col;
 
     
-    console.log("prev coords: " + prevRow + ", " + prevCol);
-    console.log(this.squares);   
+    // console.log("prev coords: " + prevRow + ", " + prevCol);
+    // console.log(this.squares);   
  
     // MOVE DOWN:
 
@@ -96,8 +96,8 @@ console.log(this.shape);
       return {row: square.row + 1, col: square.col, color: square.color};
     });
   
-    console.log("new:");
-    console.log(this.squares); 
+    // console.log("new:");
+    // console.log(this.squares); 
   
     // return this tetromino object (with updated squares array):
     return this;

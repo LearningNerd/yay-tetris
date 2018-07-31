@@ -57,7 +57,7 @@ function p5jsInstance ( p5js) {
 
   // FOR TESTING UPDATE WITH REAL TETROMINOES:
   p5js.draw = function() {
-    console.log("called draw()");
+    // console.log("called draw()");
     
     // Clear the canvas on each frame, with a background color
     p5js.background("lightgrey");
@@ -70,14 +70,8 @@ function p5jsInstance ( p5js) {
     // and get array of squares to be drawn:
     let squares = tetris.gameLoopTick();   
 
-    tetris.print(); // display grid in console
- 
-    console.log("squares array:");
-    console.log(squares);
-   
     // Draw ALL tetromino squares on each frame
     squares.forEach( s => {
-      console.log(s); 
   
       // Actual coordinates for drawing: multiple row/col by the blockSize (pixel value)
       let xPos = s.col * blockSize;
@@ -168,7 +162,7 @@ function p5jsInstance ( p5js) {
   // Draw next frame when pressing any arrow key
   p5js.keyPressed = function() {
     if (p5js.keyCode === p5js.LEFT_ARROW || p5js.keyCode === p5js.RIGHT_ARROW || p5js.keyCode === p5js.UP_ARROW || p5js.keyCode === p5js.DOWN_ARROW) {
-      console.log("Key pressed!");
+      // console.log("Key pressed!");
       p5js.redraw();
     }
   }; // end p5js.keyPressed
