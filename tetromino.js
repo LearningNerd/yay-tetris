@@ -78,17 +78,19 @@ export function Tetromino (row, col) {
   }, []);
 
 
-  // *** params: "down", "left", "right" -- for now, always move down + (left/right)
+  // *** params: "down", "left", "right"
   this.move = function(nextMove) {
     console.log("called move: " + nextMove);
 
     // Set offset values based on nextMove
-    let rowOffset = 1;
-    let colOffset = 0;
+    let rowOffset = 1; // default for down
+    let colOffset = 0; // default for down
 
-    if (nextMove.includes("left") ) {
+    if (nextMove === "left") {
+      rowOffset = 0;
       colOffset = -1;
-    } else if (nextMove.includes("right") ) {
+    } else if (nextMove === "right") {
+      rowOffset = 0;
       colOffset = 1;
     }
  

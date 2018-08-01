@@ -35,6 +35,8 @@ export function Tetris (rows, cols) {
 
   let fallenSquares = [];
   let currentTetromino;
+
+  let lastTickTimestamp = 0; // for now, number of frames
   
   // Generate 2D array based on rows / cols, each element populated with 0s
   let gameGrid = new Array(rows).fill(null).map(row => new Array(cols).fill(0));
@@ -55,12 +57,17 @@ export function Tetris (rows, cols) {
   };
  
   this.gameLoopTick = function(nextMove) {
-   
+
+    console.log("called gameLoopTick with nextMove: " + nextMove);
+    
+    // Update count for how often to move the tetromino down (every X milliseconds or game ticks)
+    lastTickTimestamp++; // for now, just counting frames
+
+    console.log("lastTick: " + lastTickTimestamp);  
+ 
     // Default to "down" if interface didn't pass any next move 
     if (nextMove == undefined) { nextMove = "down";}
 
-    console.log("called gameLoopTick with nextMove: " + nextMove);
-    // Run the game logic to update on each tick
    
     console.log("gameGrid before updating:");
     this.print(gameGrid);
@@ -76,6 +83,23 @@ export function Tetris (rows, cols) {
       gameGrid = this.updateGameGrid(prevSquares, currentTetromino.squares, gameGrid); 
 
     }
+
+    // TODO --- refactor this, repetitive!!!
+    // On every X ticks / milliseconds, move the block down (regardless of user inputs)
+    if (lastTickTimestamp % 5 === 0 && this.hasRoomForNextMove(currentTetromino, "down", gameGrid)) {
+
+      console.log("time to move the block down!!!!!!!!!!!!!!!");
+
+      let prevSquares = currentTetromino.squares;
+
+      // Get updated tetromino object with updated squares array
+      currentTetromino = currentTetromino.move("down");
+
+      gameGrid = this.updateGameGrid(prevSquares, currentTetromino.squares, gameGrid); 
+
+    }
+
+
 
     console.log("gameGrid after updating:");
     this.print(gameGrid);
@@ -125,13 +149,12 @@ export function Tetris (rows, cols) {
     console.log("called hasRoomForNextMove: " + nextMove);
 
     // Set which squares / grid spaces to check based on the next move:
-    let rowOffsetToCheck = 1;
-    let colOffsetToCheck = 0; // default is 0; change for left/right checks
+    let rowOffsetToCheck = 1; // default is 1; change for left/right
+    let colOffsetToCheck = 0; // default is 0; change for left/right
     let filterFunction;
 
-    // ALWAYS CHECK BOTTOM ROW, REGARDLESS OF MOVE
-    // *** NOTE: this will change when allowing user to move left/right before square moves down 
-      
+    // If "down", update filter function:
+    if (nextMove === "down") { 
       // Get the highest row value (for bottom-most squares):
       let bottomRowValue = currentTetromino.squares.reduce( (highestValue, square) => {
         return Math.max(square.row, highestValue);
@@ -144,10 +167,11 @@ export function Tetris (rows, cols) {
   
       filterFunction = square => square.row >= bottomRowValue;
 
-    // If "downleft" or "left", update filter function
-    if (nextMove.includes("left")) {
+    // Otherwise if "left", update filter function
+    } else if (nextMove === "left") {
 
       colOffsetToCheck = -1;
+      rowOffsetToCheck = 0;
       
       // Get the lowest col value (for left-most suqares):
       let leftColValue = currentTetromino.squares.reduce( (lowestValue, square) => {
@@ -155,68 +179,44 @@ export function Tetris (rows, cols) {
       }, 0);
  
       // Filter squares: bottom and left-most
-      filterFunction = square => square.row >= bottomRowValue || square.col <= leftColValue;
+      filterFunction = square => square.col <= leftColValue;
 
 
-    // Otherwise if "downright" or "right", update filter function
-    } else if (nextMove.includes("right")) {
+    // Otherwise if "right", update filter function
+    } else if (nextMove === "right") {
 
       colOffsetToCheck = 1;
+      rowOffsetToCheck = 0;
 
       // Get the highest col value (for right-most suqares):
       let rightColValue = currentTetromino.squares.reduce( (highestValue, square) => {
         return Math.max(square.col, highestValue);
       }, 0);
  
-      // Filter squares: bottom and left-most
-      filterFunction = square => square.row >= bottomRowValue || square.col >= rightColValue;
+      // Filter squares: left-most
+      filterFunction = square => square.col >= rightColValue;
 
 
     } // later: implement for "left" and "right" ... and for rotations, eep!
 
-    // Filter the squares
+    // Filter the squares: get only the edge squares to check for collisions
     let squaresToCheck = currentTetromino.squares.filter(filterFunction);
 
     console.log(squaresToCheck);
 
-    // Check grid squares adjacent to every tetromino square:
+    // Check grid squares adjacent to every tetromino square, return false for any collisions:
     for (let s of squaresToCheck) {
       
       if (!gameGrid[s.row + rowOffsetToCheck] || gameGrid[s.row + rowOffsetToCheck][s.col + colOffsetToCheck] !== 0) {
-        console.log("Square at " + s.row + ", " + s.col + " does NOT have room below.");
+        console.log("Square at " + s.row + ", " + s.col + " does NOT have room for move:" + nextMove);
         return false;
       }
 
     }
 
-    console.log("All squares have room below!");
+    console.log("All squares have room for move: " + nextMove);
     // If all the squares have room below, return true:
     return true;
-
-
-    /*
-      STUFF TO CHECK:
-        
-      "down" -- get bottomRowValue with max value of rows, filter by row >= bottomRowValue
-            -- check grid[row + 1][col] for each bottom square
-
-      "left" -- get leftColVal with MIN value of COLs, filter by col <= leftColValue
-            --  check grid[row][col - 1] for each left square
-
-      "right" -- get rightColVal with MAX value of COLS, filter by col >= rightColValue
-            --  check grid[row][col + 1] for each right square
-
-
-
-      "downleft" -- filter to bottom AND left squares,
-                -- check grid[row + 1][col - 1]
-
-      "downright" -- filter to bottom AND right squares,
-                --  check grid[row + 1][col + 1]
-
-    */
-
-
 
   }; // end hasRoomForNextMove()
   
