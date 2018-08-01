@@ -69,12 +69,12 @@ export function Tetris (rows, cols) {
     this.print(gameGrid);
 
 
-    if (this.hasRoomForNextMove(currentTetromino) ) {
+    if (this.hasRoomForNextMove(currentTetromino, "down", gameGrid)) {
 
       let prevSquares = currentTetromino.squares;
 
       // Get updated tetromino object with updated squares array
-      currentTetromino = currentTetromino.move();
+      currentTetromino = currentTetromino.move("down");
 
       gameGrid = this.updateGameGrid(prevSquares, currentTetromino.squares, gameGrid); 
 
@@ -124,41 +124,102 @@ export function Tetris (rows, cols) {
 
   // Return true if there's room for the next move
   // FOR NOW, ONLY CHECKING BELOW BLOCK (not left or right) 
-  this.hasRoomForNextMove = function(currentTetromino) {
+  this.hasRoomForNextMove = function(currentTetromino, nextMove, gameGrid) {
     console.log("called hasRoomForNextMove");
 
-    // Get this tetromino's bottom-most squares.
-    // First get the highest row value:
-    let bottomRowValue = currentTetromino.squares.reduce( (highestValue, square) => {
-      return Math.max(square.row, highestValue);
-    }, -1);
-    // *** IMPORTANT NOTE: start by comparing to -1, because tetrominoes start at row -1 when created,
-    // because p5js calls the draw() function once on page load first, before advancing the frames,
-    // so by starting at row -1, it appears at row 0 once the page is visible.
+    // Set which squares / grid spaces to check based on the next move:
+    let rowOffsetToCheck = 1;
+    let colOffsetToCheck = 0; // default is 0; change for left/right checks
+    let filterFunction;
 
-    // console.log("bottom row value: " + bottomRowValue);
-
-    let bottomSquares = currentTetromino.squares.filter( square => {
-      // console.log("this square's row: " + square.row + " // bottomRow val: " + bottomRowValue);
-      // console.log(square.row >= bottomRowValue);
-      return square.row >= bottomRowValue;
-    });
-    
-    // console.log(bottomSquares);
-
-    // Check below each bottom square:
-    for (let s of bottomSquares) {
+    // ALWAYS CHECK BOTTOM ROW, REGARDLESS OF MOVE
+    // *** NOTE: this will change when allowing user to move left/right before square moves down 
       
-      if (!gameGrid[s.row + 1] || gameGrid[s.row + 1][s.col] !== 0) {
-        // console.log("Square at " + s.row + ", " + s.col + " does NOT have room below.");
+      // Get the highest row value (for bottom-most squares):
+      let bottomRowValue = currentTetromino.squares.reduce( (highestValue, square) => {
+        return Math.max(square.row, highestValue);
+      }, -1);
+      // *** IMPORTANT NOTE: start by comparing to -1, because tetrominoes start at row -1 when created,
+      // because p5js calls the draw() function once on page load first, before advancing the frames,
+      // so by starting at row -1, it appears at row 0 once the page is visible.
+  
+      // console.log("bottom row value: " + bottomRowValue);
+  
+      filterFunction = square => square.row >= bottomRowValue;
+
+    // If "downleft" or "left", update filter function
+    if (nextMove.includes("left")) {
+
+      colOffsetToCheck = -1;
+      
+      // Get the lowest col value (for left-most suqares):
+      let leftColValue = currentTetromino.squares.reduce( (lowestValue, square) => {
+        return Math.min(square.col, lowestValue);
+      }, 0);
+ 
+      // Filter squares: bottom and left-most
+      filterFunction = square => square.row >= bottomRowValue || square.col <= leftColValue;
+
+
+    // Otherwise if "downright" or "right", update filter function
+    } else if (nextMove.includes("right")) {
+
+      colOffsetToCheck = 1;
+
+      // Get the highest col value (for right-most suqares):
+      let rightColValue = currentTetromino.squares.reduce( (highestValue, square) => {
+        return Math.max(square.col, highestValue);
+      }, 0);
+ 
+      // Filter squares: bottom and left-most
+      filterFunction = square => square.row >= bottomRowValue || square.col >= rightColValue;
+
+
+    } // later: implement for "left" and "right" ... and for rotations, eep!
+
+    // Filter the squares
+    let squaresToCheck = currentTetromino.squares.filter(filterFunction);
+
+    console.log(squaresToCheck);
+
+    // Check grid squares adjacent to every tetromino square:
+    for (let s of squaresToCheck) {
+      
+      if (!gameGrid[s.row + rowOffsetToCheck] || gameGrid[s.row + rowOffsetToCheck][s.col + colOffsetToCheck] !== 0) {
+        console.log("Square at " + s.row + ", " + s.col + " does NOT have room below.");
         return false;
       }
 
     }
 
-    // console.log("All squares have room below!");
+    console.log("All squares have room below!");
     // If all the squares have room below, return true:
     return true;
+
+
+    /*
+      STUFF TO CHECK:
+        
+      "down" -- get bottomRowValue with max value of rows, filter by row >= bottomRowValue
+            -- check grid[row + 1][col] for each bottom square
+
+      "left" -- get leftColVal with MIN value of COLs, filter by col <= leftColValue
+            --  check grid[row][col - 1] for each left square
+
+      "right" -- get rightColVal with MAX value of COLS, filter by col >= rightColValue
+            --  check grid[row][col + 1] for each right square
+
+
+
+      "downleft" -- filter to bottom AND left squares,
+                -- check grid[row + 1][col - 1]
+
+      "downright" -- filter to bottom AND right squares,
+                --  check grid[row + 1][col + 1]
+
+    */
+
+
 
   }; // end hasRoomForNextMove()
   
@@ -203,6 +264,9 @@ export function Tetris (rows, cols) {
   
     // Update currently active tetromino (global var for now) 
     currentTetromino = tetromino;
+
+    console.log(currentTetromino.squares);
+
   }
   
   
