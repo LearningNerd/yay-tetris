@@ -34,7 +34,7 @@ Game:
 export function Tetris (rows, cols) {
 
   let fallenSquares = [];
-  let currentTetromino;
+  let currentTetromino = new Tetromino(-1,0); // initialize game with first Tetromino, starts above screen because drawing loop runs once on page load and will move it down immediately
 
   let lastTickTimestamp = 0; // for now, number of frames
   
@@ -86,17 +86,27 @@ export function Tetris (rows, cols) {
 
     // TODO --- refactor this, repetitive!!!
     // On every X ticks / milliseconds, move the block down (regardless of user inputs)
-    if (lastTickTimestamp % 5 === 0 && this.hasRoomForNextMove(currentTetromino, "down", gameGrid)) {
+    if (lastTickTimestamp % 5 === 0) {
 
       console.log("time to move the block down!!!!!!!!!!!!!!!");
 
-      let prevSquares = currentTetromino.squares;
+      // Move down the current tetromino if there's room below:
+      if (this.hasRoomForNextMove(currentTetromino, nextMove, gameGrid)) {
 
-      // Get updated tetromino object with updated squares array
-      currentTetromino = currentTetromino.move("down");
+        let prevSquares = currentTetromino.squares;
 
-      gameGrid = this.updateGameGrid(prevSquares, currentTetromino.squares, gameGrid); 
+        // Get updated tetromino object with updated squares array
+        currentTetromino = currentTetromino.move("down");
 
+        gameGrid = this.updateGameGrid(prevSquares, currentTetromino.squares, gameGrid); 
+      
+      // Otherwise if no room below and it's time to move down, drop next tetromino!
+      } else {
+        
+        currentTetromino = this.createTetromino(0,0);
+        
+
+      }
     }
 
 
@@ -250,20 +260,14 @@ export function Tetris (rows, cols) {
 
 
 
-  // Create a new tetromino and add to squares array
+  // Create a new tetromino and return it
   this.createTetromino  = function (row, col) {
     
-    // console.log(" *** CREATING TETROMINO ***");
+    console.log(" *** CREATING TETROMINO ***");
     // console.log(row + ", " + col);
     
-    // Create and merge new squares with squares array
-    let tetromino = new Tetromino(row, col);
+    return new Tetromino(row, col);
   
-    // Update currently active tetromino (global var for now) 
-    currentTetromino = tetromino;
-
-    console.log(currentTetromino.squares);
-
   }
   
   
