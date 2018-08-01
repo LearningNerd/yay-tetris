@@ -78,26 +78,24 @@ export function Tetromino (row, col) {
   }, []);
 
 
-  // *** params: "down", "downleft", "downright" for now
-  this.move = function() {
-    console.log("called move");
+  // *** params: "down", "left", "right" -- for now, always move down + (left/right)
+  this.move = function(nextMove) {
+    console.log("called move: " + nextMove);
 
-    // Get top left coordinate    
-    let prevRow = this.squares[0].row;
-    let prevCol = this.squares[0].col;
+    // Set offset values based on nextMove
+    let rowOffset = 1;
+    let colOffset = 0;
 
-    
-    // console.log("prev coords: " + prevRow + ", " + prevCol);
-    // console.log(this.squares);   
+    if (nextMove.includes("left") ) {
+      colOffset = -1;
+    } else if (nextMove.includes("right") ) {
+      colOffset = 1;
+    }
  
-    // MOVE DOWN:
-
+    // MOVE THE SQUARES:
     this.squares = this.squares.map( square => {
-      return {row: square.row + 1, col: square.col, color: square.color};
+      return {row: square.row + rowOffset, col: square.col + colOffset, color: square.color};
     });
-  
-    // console.log("new:");
-    // console.log(this.squares); 
   
     // return this tetromino object (with updated squares array):
     return this;

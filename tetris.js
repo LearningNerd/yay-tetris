@@ -54,27 +54,24 @@ export function Tetris (rows, cols) {
     console.log(stringGrid);
   };
  
-  this.gameLoopTick = function() {
-    console.log("called gameLoopTick");
+  this.gameLoopTick = function(nextMove) {
+   
+    // Default to "down" if interface didn't pass any next move 
+    if (nextMove == undefined) { nextMove = "down";}
+
+    console.log("called gameLoopTick with nextMove: " + nextMove);
     // Run the game logic to update on each tick
    
-    // For now, just move the tetromino down on every tick. and for now, no params for move():
-
-
-    // console.log(currentTetromino);
-
-    // **** this is super incomplete and wrong =P
-
     console.log("gameGrid before updating:");
     this.print(gameGrid);
 
 
-    if (this.hasRoomForNextMove(currentTetromino, "down", gameGrid)) {
+    if (this.hasRoomForNextMove(currentTetromino, nextMove, gameGrid)) {
 
       let prevSquares = currentTetromino.squares;
 
       // Get updated tetromino object with updated squares array
-      currentTetromino = currentTetromino.move("down");
+      currentTetromino = currentTetromino.move(nextMove);
 
       gameGrid = this.updateGameGrid(prevSquares, currentTetromino.squares, gameGrid); 
 
@@ -125,7 +122,7 @@ export function Tetris (rows, cols) {
   // Return true if there's room for the next move
   // FOR NOW, ONLY CHECKING BELOW BLOCK (not left or right) 
   this.hasRoomForNextMove = function(currentTetromino, nextMove, gameGrid) {
-    console.log("called hasRoomForNextMove");
+    console.log("called hasRoomForNextMove: " + nextMove);
 
     // Set which squares / grid spaces to check based on the next move:
     let rowOffsetToCheck = 1;
