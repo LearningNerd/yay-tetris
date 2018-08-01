@@ -32,6 +32,8 @@ function p5jsInstance ( p5js) {
   // Create instance of Tetris module
   let tetris = new Tetris(rows, cols);
 
+  // Will update this on key press, pass to gameLoopTick
+  let nextMove;
 
   // Runs once to set up the canvas element and p5js animation stuff
   p5js.setup = function() {
@@ -66,9 +68,9 @@ function p5jsInstance ( p5js) {
     // TODO: Pass "left" or "right" to gameLoopTick
     // based on key presses
 
-    // RUN GAME LOOP ON EVERY FRAME
+    // RUN GAME LOOP ON EVERY FRAME, pass in nextMove
     // and get array of squares to be drawn:
-    let squares = tetris.gameLoopTick();   
+    let squares = tetris.gameLoopTick(nextMove);
 
     // Draw ALL tetromino squares on each frame
     squares.forEach( s => {
@@ -162,7 +164,19 @@ function p5jsInstance ( p5js) {
   // Draw next frame when pressing any arrow key
   p5js.keyPressed = function() {
     if (p5js.keyCode === p5js.LEFT_ARROW || p5js.keyCode === p5js.RIGHT_ARROW || p5js.keyCode === p5js.UP_ARROW || p5js.keyCode === p5js.DOWN_ARROW) {
-      // console.log("Key pressed!");
+
+      if (p5js.keyCode === p5js.LEFT_ARROW) {
+        nextMove = "left";
+        console.log("Key pressed: left");
+      } else if (p5js.keyCode === p5js.RIGHT_ARROW) {
+        nextMove = "right";
+        console.log("Key pressed: right");
+      } else {
+        nextMove = "down";
+        console.log("Key pressed: default to move down");
+      } 
+ 
+
       p5js.redraw();
     }
   }; // end p5js.keyPressed
