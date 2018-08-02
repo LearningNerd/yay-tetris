@@ -91,7 +91,7 @@ export function Tetris (rows, cols) {
       console.log("time to move the block down!!!!!!!!!!!!!!!");
 
       // Move down the current tetromino if there's room below:
-      if (this.hasRoomForNextMove(currentTetromino, nextMove, gameGrid)) {
+      if (this.hasRoomForNextMove(currentTetromino, "down", gameGrid)) {
 
         let prevSquares = currentTetromino.squares;
 
@@ -102,9 +102,9 @@ export function Tetris (rows, cols) {
       
       // Otherwise if no room below and it's time to move down, drop next tetromino!
       } else {
-        
+
         currentTetromino = this.createTetromino(0,0);
-        
+        console.log("****** Dropping next tetromino! *******");        
 
       }
     }
@@ -265,6 +265,9 @@ export function Tetris (rows, cols) {
     
     console.log(" *** CREATING TETROMINO ***");
     // console.log(row + ", " + col);
+
+    // Save current tetromino's squares to fallenSquares array
+    fallenSquares = [...fallenSquares, ...currentTetromino.squares];
     
     return new Tetromino(row, col);
   
