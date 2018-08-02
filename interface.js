@@ -24,7 +24,7 @@ let p5js = new p5(p5jsInstance);
 function p5jsInstance ( p5js) {
 
   // Params for drawing:
-  const rows = 8, cols = 4;  
+  const rows = 12, cols = 6;
   const blockSize = 25;
   const canvasWidth = blockSize * cols;
   const canvasHeight = blockSize * rows;
