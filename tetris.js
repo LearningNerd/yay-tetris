@@ -137,7 +137,7 @@ export function Tetris (rows, cols) {
       // Otherwise if the current tetromino has landed (and fits on the screen), drop the next one!
       } else {
         // Otherwise if current tetromino has landed, drop the next one!
-        currentTetromino = this.createTetromino(-1,0);
+        currentTetromino = this.createTetromino(0,0); // NOTE: entire tetromino appears on screen all at once, by design. (this varies in different versions of tetris)
         console.log("****** Dropping next tetromino! *******");        
 
       }
@@ -186,15 +186,15 @@ export function Tetris (rows, cols) {
   }; 
 
 
-  // Return true if any of the tetromino's squares are off the screen
+  // Return true if any of the tetromino's squares are at the very top of the screen, or off the screen
   this.isOffScreen = function (currentTetromino, gameGrid) {
 
     console.log("called isOffScreen");
     console.log(currentTetromino.squares);
 
     for (let square of currentTetromino.squares) {
-      if (square.row < 0) {
-        console.log("square at " + square.row + ", " + square.col + " is off screen!");
+      if (square.row <= 0) {
+        console.log("square at " + square.row + ", " + square.col + " is at top of screen or off screen!");
         return true;
       }
     }
