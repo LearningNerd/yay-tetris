@@ -82,7 +82,36 @@ export function Tetris (rows, cols) {
 
       gameGrid = this.updateGameGrid(prevSquares, currentTetromino.squares, gameGrid); 
 
-    }
+    // Otherwise, if the newest tetromino has no room and it's sitting above the screen, game over!
+    } else if (this.isOffScreen(currentTetromino, gameGrid)) {
+  
+      this.endGame();
+   
+    } 
+    // Otherwise if the current tetromino has landed
+    // } else {
+  
+      // Check for any completed rows
+      // let completedRows = getCompletedRowIndexes(gameGrid);
+  
+      // If there are any, update the game grid and tetrominoes array to remove cleared rows and move down upper rows
+      // if (completedRows.length !== 0) {
+        // console.log("completedRows");
+        // console.log(completedRows)
+  
+        // gameGrid = clearRows(completedRows, gameGrid); 
+        // tetrominoes = updateTetrominoes(tetrominoes, completedRows);
+      // }
+      
+      // Drop the next tetromino
+      // createTetromino(p5js);
+
+//    } // end of if
+
+
+
+
+
 
     // TODO --- refactor this, repetitive!!!
     // On every X ticks / milliseconds, move the block down (regardless of user inputs)
@@ -99,11 +128,16 @@ export function Tetris (rows, cols) {
         currentTetromino = currentTetromino.move("down");
 
         gameGrid = this.updateGameGrid(prevSquares, currentTetromino.squares, gameGrid); 
-      
-      // Otherwise if no room below and it's time to move down, drop next tetromino!
-      } else {
+  
+      // Otherwise, if no room below, and current tetromino won't fit on the screen, game over!
+      // } else if (this.isOffScreen(currentTetromino, gameGrid)) {
+  
+        // this.endGame();
 
-        currentTetromino = this.createTetromino(0,0);
+      // Otherwise if the current tetromino has landed (and fits on the screen), drop the next one!
+      } else {
+        // Otherwise if current tetromino has landed, drop the next one!
+        currentTetromino = this.createTetromino(-1,0);
         console.log("****** Dropping next tetromino! *******");        
 
       }
@@ -152,6 +186,24 @@ export function Tetris (rows, cols) {
   }; 
 
 
+  // Return true if any of the tetromino's squares are off the screen
+  this.isOffScreen = function (currentTetromino, gameGrid) {
+
+    console.log("called isOffScreen");
+    console.log(currentTetromino.squares);
+
+    for (let square of currentTetromino.squares) {
+      if (square.row < 0) {
+        console.log("square at " + square.row + ", " + square.col + " is off screen!");
+        return true;
+      }
+    }
+
+    // Otherwise if all squares are on the screen, return false
+    console.log("All squares fit on screen");
+    return false;
+
+  };
 
   // Return true if there's room for the next move
   // FOR NOW, ONLY CHECKING BELOW BLOCK (not left or right) 
@@ -335,7 +387,7 @@ export function Tetris (rows, cols) {
     });
   }
   
-  // Later: a nicer "game over" screen
+  // Later: a nicer "game over" screen -- and turn off game loop / controls!
   this.endGame = function () {
     console.log("Game over!");
     
