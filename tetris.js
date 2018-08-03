@@ -85,7 +85,8 @@ export function Tetris (rows, cols) {
     // Otherwise, if the newest tetromino has no room and it's sitting above the screen, game over!
     } else if (this.isOffScreen(currentTetromino, gameGrid)) {
   
-      this.endGame();
+      // TEMPORARILY TURNING THIS OFF -- BUG: if any move has any type of collision while tetromino is at top of screen, false positive! 
+      // this.endGame();
    
     } 
     // Otherwise if the current tetromino has landed
@@ -210,77 +211,98 @@ export function Tetris (rows, cols) {
   this.hasRoomForNextMove = function(currentTetromino, nextMove, gameGrid) {
     console.log("called hasRoomForNextMove: " + nextMove);
 
+    console.log("shape:");
+    console.log(currentTetromino.shape);
+
     // Set which squares / grid spaces to check based on the next move:
     let rowOffsetToCheck = 1; // default is 1; change for left/right
     let colOffsetToCheck = 0; // default is 0; change for left/right
-    let filterFunction;
 
-    // If "down", update filter function:
-    if (nextMove === "down") { 
-      // Get the highest row value (for bottom-most squares):
-      let bottomRowValue = currentTetromino.squares.reduce( (highestValue, square) => {
-        return Math.max(square.row, highestValue);
-      }, -1);
-      // *** IMPORTANT NOTE: start by comparing to -1, because tetrominoes start at row -1 when created,
-      // because p5js calls the draw() function once on page load first, before advancing the frames,
-      // so by starting at row -1, it appears at row 0 once the page is visible.
-  
-      // console.log("bottom row value: " + bottomRowValue);
-  
-      filterFunction = square => square.row >= bottomRowValue;
-
-    // Otherwise if "left", update filter function
-    } else if (nextMove === "left") {
-
-      colOffsetToCheck = -1;
+    // For checking squares against each other within the tetromino, since this only checks each unique pair once, it checks in order of the array of squares: top to bottom, left to right -- so looking to the right of each square works, but looking to the left doesn't work (because we're already on the left-most square when we check each pair!)
+    // SOLUTION (for now): always check to the right, but switch which square in the pair is pushed into indexesToRemove based on left/right
+    if (nextMove === "left" || nextMove === "right") {
       rowOffsetToCheck = 0;
-      
-      // Get the lowest col value (for left-most suqares):
-      let leftColValue = currentTetromino.squares.reduce( (lowestValue, square) => {
-        return Math.min(square.col, lowestValue);
-      }, 0);
- 
-      // Filter squares: bottom and left-most
-      filterFunction = square => square.col <= leftColValue;
-
-
-    // Otherwise if "right", update filter function
-    } else if (nextMove === "right") {
-
       colOffsetToCheck = 1;
-      rowOffsetToCheck = 0;
+    } 
 
-      // Get the highest col value (for right-most suqares):
-      let rightColValue = currentTetromino.squares.reduce( (highestValue, square) => {
-        return Math.max(square.col, highestValue);
-      }, 0);
- 
-      // Filter squares: left-most
-      filterFunction = square => square.col >= rightColValue;
+    // Compile list of edge squares
+    // NOTE: This is so complicated!!! Surely I can refactor this quite a bit. But for now, at least it works. =P
+    let squares = [...currentTetromino.squares];
+    let indexesToRemove = [];
 
+    for (let outerIndex = 0; outerIndex < squares.length; outerIndex++) {
 
-    } // later: implement for "left" and "right" ... and for rotations, eep!
+      for (let innerIndex = outerIndex + 1; innerIndex < squares.length; innerIndex++) {
 
-    // Filter the squares: get only the edge squares to check for collisions
-    let squaresToCheck = currentTetromino.squares.filter(filterFunction);
+        console.log(outerIndex + " vs " + innerIndex);
+        console.log("(" + squares[outerIndex].row + "," + squares[outerIndex].col + ") vs (" + squares[innerIndex].row + "," + squares[innerIndex].col + ")");
 
-    console.log(squaresToCheck);
+          console.log("1st square's row plus offset: " + (squares[outerIndex].row + rowOffsetToCheck));
+          console.log("1st square's col plus offset: " + (squares[outerIndex].col + colOffsetToCheck));
 
-    // Check grid squares adjacent to every tetromino square, return false for any collisions:
-    for (let s of squaresToCheck) {
+        // If the square being checked (outerIndex) has a square on its {lower/right/left} border, add it to indexesToRemove
+        if (squares[outerIndex].row + rowOffsetToCheck === squares[innerIndex].row && squares[outerIndex].col + colOffsetToCheck === squares[innerIndex].col)  {
+
+            console.log(squares[outerIndex].col + colOffsetToCheck + " matches " + squares[innerIndex].col);
+
+            console.log("remove this square from the list: index " + outerIndex + " - (" + squares[outerIndex].row + "," + squares[outerIndex].col + ")");
+
+            // If looking to the left, remove the OTHER square (the check is REVERSED!), see comment further up. yes, this is ugly and complicated right now. Gotta refactor this later, or at least try to! =P
+            if (nextMove === "left") {
+              indexesToRemove.push(innerIndex);
+            } else {
+              indexesToRemove.push(outerIndex);
+            }
+
+          } // end if square is not an edge square
       
-      if (!gameGrid[s.row + rowOffsetToCheck] || gameGrid[s.row + rowOffsetToCheck][s.col + colOffsetToCheck] !== 0) {
-        console.log("Square at " + s.row + ", " + s.col + " does NOT have room for move:" + nextMove);
+      } // inner for
+    } // outer for
+
+    console.log("indexesToRemove:");
+    console.log(indexesToRemove);
+
+    let edgeSquares = squares.filter( (square, index) => !indexesToRemove.includes(index) ); 
+
+    console.log("edge squares: ");
+    console.log(edgeSquares);
+
+    // For checking gameGrid spaces, left/right positioning works fine:
+    if (nextMove === "left") {
+      rowOffsetToCheck = 0;
+      colOffsetToCheck = -1;
+    } else if (nextMove === "right") {
+      rowOffsetToCheck = 0;
+      colOffsetToCheck = 1;
+    }
+
+    // Check the grid space for the {lower/left/right} edge of each edge square; if any collisions, return false!
+    for (let square of edgeSquares) {
+
+      // If adjacent grid square is outside the range of gameGrid, or if the square does NOT have a value of 0 (if 1 or undefined/empty), collision!
+      if (!gameGrid[square.row + rowOffsetToCheck] || !gameGrid[square.col + colOffsetToCheck] || gameGrid[square.row + rowOffsetToCheck][square.col + colOffsetToCheck] !== 0) {
+        console.log("COLLISION DETECTED!");
+        console.log("checking row: " + (square.row + rowOffsetToCheck));
+        console.log("checking col: " + (square.col + colOffsetToCheck));
+      
         return false;
+      } else {
+
+        console.log("No collision in this square:");
+        console.log("checking row: " + (square.row + rowOffsetToCheck));
+        console.log("checking col: " + (square.col + colOffsetToCheck));
+      
       }
 
     }
 
-    console.log("All squares have room for move: " + nextMove);
+    console.log("no game grid collisions detected; returning TRUE for hasRoomForNextMove");
+    this.print(gameGrid);
     // If all the squares have room below, return true:
     return true;
 
   }; // end hasRoomForNextMove()
+
   
 
   // Return updated game grid after switching squares on/off based on prev and next coords
