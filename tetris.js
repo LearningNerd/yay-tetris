@@ -55,6 +55,20 @@ export function Tetris (rows, cols) {
     }, "\n");
     console.log(stringGrid);
   };
+
+
+  this.createTetromino  = function (row, col) {
+    
+    console.log(" *** CREATING TETROMINO ***");
+    // console.log(row + ", " + col);
+
+    // Save current tetromino's squares to fallenSquares array
+    fallenSquares = [...fallenSquares, ...currentTetromino.squares];
+    
+    return new Tetromino(row, col);
+  
+  }
+  
  
   this.gameLoopTick = function(nextMove) {
 
@@ -82,34 +96,9 @@ export function Tetris (rows, cols) {
 
       gameGrid = this.updateGameGrid(prevSquares, currentTetromino.squares, gameGrid); 
 
-    // Otherwise, if the newest tetromino has no room and it's sitting above the screen, game over!
     } 
   
-    // Otherwise if the current tetromino has landed
-    // } else {
-  
-      // Check for any completed rows
-      // let completedRows = getCompletedRowIndexes(gameGrid);
-  
-      // If there are any, update the game grid and tetrominoes array to remove cleared rows and move down upper rows
-      // if (completedRows.length !== 0) {
-        // console.log("completedRows");
-        // console.log(completedRows)
-  
-        // gameGrid = clearRows(completedRows, gameGrid); 
-        // tetrominoes = updateTetrominoes(tetrominoes, completedRows);
-      // }
-      
-      // Drop the next tetromino
-      // createTetromino(p5js);
-
-//    } // end of if
-
-
-
-
-
-
+       
     // TODO --- refactor this, repetitive!!!
     // On every X ticks / milliseconds, move the block down (regardless of user inputs)
     if (lastTickTimestamp % 5 === 0) {
@@ -125,69 +114,41 @@ export function Tetris (rows, cols) {
         currentTetromino = currentTetromino.move("down");
 
         gameGrid = this.updateGameGrid(prevSquares, currentTetromino.squares, gameGrid); 
-  
-      // Otherwise, if no room below, and current tetromino won't fit on the screen, game over!
-      // } else if (this.isOffScreen(currentTetromino, gameGrid)) {
-  
-        // this.endGame();
-
+ 
       // Otherwise if the current tetromino has landed (and fits on the screen), drop the next one!
       } else {
+       
         // Otherwise if current tetromino has landed, drop the next one!
         currentTetromino = this.createTetromino(0,0); // NOTE: entire tetromino appears on screen all at once, by design. (this varies in different versions of tetris)
         console.log("****** Dropping next tetromino! *******");        
      
 
-        // Immediately check if the next new tetromino has room to move down the screen 
         if ( this.overlapsOtherSquares(currentTetromino, gameGrid) ) {
           console.log("new tetromino does NOT have room below");
           this.endGame();
         }
 
-      }
-    }
+ 
+        // Check if a row has been completed
+        let completedRows = this.getCompletedRows(gameGrid);
+        
+        if (completedRows.length > 0) {
+          // Update gameGrid and update fallenSquares to remove completed rows, shift down other rows as needed
+          gameGrid = this.clearRowsInGameGrid(completedRows, gameGrid);
+          fallenSquares = this.clearAndUpdateSquares(completedRows, fallenSquares);
+        }
 
 
+      }// end else: current tetromino has landed
+    }//end if lastTickTimestamp..
 
     console.log("gameGrid after updating:");
     this.print(gameGrid);
 
-
-    // *** Need to update the gameGrid and new squares array after movement
-
- 
-
-    /*
-    // Pretend code, what this might look like when completed:
-    //
-
-    if (hasRoomForNextMove() ) {
-
-      gameGrid = updateGameGrid(gameGrid);
-      squares = updateSquares(squares);
-    }
-
-
-    let completedRows = getCompletedRows(gameGrid);
-      
-    if (completedRows) {
-        gameGrid = clearRows(completedRows, gameGrid);
-        squares = updateSquares(squares, completedRows);
-    }    
-
-    // Pseudocode:
-    // 1. Based on the next move (down, right, or left),
-    //    check if hasRoomForNextMove
-    // 2. If there's room, move the tetromino
-    // 3. Then check if this completes a row
-    // 4. If so, clear the rows and shift down the
-    //    rows above.
-
-   */
-
     // Return all squares in the game to be drawn on each frame:
     return [...fallenSquares, ...currentTetromino.squares];
   }; 
+
 
 
   // Return true if any of current tetromino's squares lie on top of occupied squares of the gameGrid
@@ -335,25 +296,10 @@ export function Tetris (rows, cols) {
   }; // end updateGameGrid()
 
 
-
-  // Create a new tetromino and return it
-  this.createTetromino  = function (row, col) {
-    
-    console.log(" *** CREATING TETROMINO ***");
-    // console.log(row + ", " + col);
-
-    // Save current tetromino's squares to fallenSquares array
-    fallenSquares = [...fallenSquares, ...currentTetromino.squares];
-    
-    return new Tetromino(row, col);
-  
-  }
-  
-  
   // PURE FUNCTION -- given a gameGrid, return array of row indexes that have been completed
-  this.getCompletedRowIndexes  = function (gameGrid) {
+  this.getCompletedRows = function (gameGrid) {
   
-    console.log("called getCompletedRowIndexes");
+    console.log("called getCompletedRows");
   
     return gameGrid.map ( (row, index) => {
       let rowSum = row.reduce( (square,sum) => sum + square);
@@ -367,48 +313,49 @@ export function Tetris (rows, cols) {
   
   // Return a new gameGrid with all completed rows cleared and new empty rows added to the top
   // Pure function :)
-  this.clearRows  = function (completedRows, gameGrid) {
+  this.clearRowsInGameGrid = function (completedRows, gameGrid) {
   
     // ALSO TODO: INCREASE SCORE FOR EACH COMPLETED ROW
   
-    console.log("called clearRows");
+    console.log("called clearRowsInGameGrid");
   
     let newGameGrid = Array.from(gameGrid);
   
+    // For each completed row, remove it from gameGrid and add a new empty row to the top
     completedRows.forEach( rowIndex => {
       newGameGrid.splice(rowIndex, 1);
-      // NOTE: shouldn't be using global cols var here:
-      newGameGrid.unshift( new Array(4).fill(0) );
+      newGameGrid.unshift( new Array(cols).fill(0) );
     });
   
     return newGameGrid;
   }
   
-  // Remove and shift down tetrominoes as needed after rows have been completed.
-  // Pure function :)
-  //    TODO: this WILL NOT work once tetrominoes come in multiple shapes, 
-  //          because not all rows will need to be shifted down; only those ABOVE the removed rows!
-  this.updateTetrominoes = function (tetrominoes, completedRows) {
+  // Remove and shift down squares as needed after rows have been completed
+  this.clearAndUpdateSquares = function (completedRows, fallenSquares) {
   
-    console.log("called updateTetrominoes");
-    console.log("initial tetrominoes:");
-    console.log(tetrominoes);
+    console.log("called clearAndUpdateSquares");
   
-    // Filter tetrominoes array to remove any that belonged to any of completedRows,
-    tetrominoes = tetrominoes.filter(tetromino => completedRows.indexOf(tetromino.row) === -1 );
+    // Filter fallenSquares array to remove any that belonged to any of completedRows,
+    let remainingSquares = fallenSquares.filter(square => completedRows.indexOf(square.row) === -1 );
   
-    console.log("Tetrominoes AFTER filtering in updateTetrominoes:");
-    console.log(tetrominoes); 
-  
-    // And shift down all the remaining tetrominoes 
-    // and RETURN this new array as output
-    return tetrominoes.map(tetromino => {
-      if (tetromino.row === -1) {
-        return tetromino;
-      } else {
-        return {...tetromino, row: tetromino.row + 1};
-      }
+    console.log("After filtering clear rows:");
+    console.log(remainingSquares); 
+
+
+    // Shift each remaining square's row down X times, where X is the number of cleared rows below it
+    let updatedFallenSquares = remainingSquares.map(square => {
+
+      let numClearedRowsBelow = completedRows.filter(rowIndex => rowIndex > square.row).length;
+      return {...square, row: square.row + numClearedRowsBelow};
+
     });
+
+
+    console.log("after moving squares down:");
+    console.log(updatedFallenSquares);
+
+    return updatedFallenSquares;
+ 
   }
   
   // Later: a nicer "game over" screen -- and turn off game loop / controls!
