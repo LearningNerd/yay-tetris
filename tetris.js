@@ -415,8 +415,10 @@ export function Tetris (rows, cols) {
   this.endGame = function () {
     console.log("Game over!");
     
-    let x = document.body.innerHTML;  
-    document.body.innerHTML = x + " <h1>Game over!</h1>"; 
+    // let x = document.body.innerHTML;
+    let elem = document.createElement("h1");
+    elem.textContent = "Game over!";
+    document.body.appendChild(elem);
   
   };
   
