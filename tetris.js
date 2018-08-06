@@ -89,7 +89,7 @@ export function Tetris (rows, cols) {
 
     if (this.hasRoomForNextMove(currentTetromino, nextMove, gameGrid)) {
 
-      let prevSquares = currentTetromino.squares;
+      let prevSquares = [...currentTetromino.squares];
 
       // Get updated tetromino object with updated squares array
       currentTetromino = currentTetromino.move(nextMove);
@@ -108,7 +108,7 @@ export function Tetris (rows, cols) {
       // Move down the current tetromino if there's room below:
       if (this.hasRoomForNextMove(currentTetromino, "down", gameGrid)) {
 
-        let prevSquares = currentTetromino.squares;
+        let prevSquares = [...currentTetromino.squares];
 
         // Get updated tetromino object with updated squares array
         currentTetromino = currentTetromino.move("down");
@@ -124,7 +124,7 @@ export function Tetris (rows, cols) {
      
 
         if ( this.overlapsOtherSquares(currentTetromino, gameGrid) ) {
-          console.log("new tetromino does NOT have room below");
+          console.log("new tetromino overlaps; game over!");
           this.endGame();
         }
 
@@ -133,9 +133,10 @@ export function Tetris (rows, cols) {
         let completedRows = this.getCompletedRows(gameGrid);
         
         if (completedRows.length > 0) {
-          // Update gameGrid and update fallenSquares to remove completed rows, shift down other rows as needed
-          gameGrid = this.clearRowsInGameGrid(completedRows, gameGrid);
+          // Update fallenSquares to remove completed rows, shift down other rows as needed
+          let prevSquares = [...fallenSquares];
           fallenSquares = this.clearAndUpdateSquares(completedRows, fallenSquares);
+          gameGrid = this.updateGameGrid(prevSquares, fallenSquares, gameGrid);
         }
 
 
@@ -310,25 +311,7 @@ export function Tetris (rows, cols) {
     }).filter(row => row != undefined); 
   
   }
-  
-  // Return a new gameGrid with all completed rows cleared and new empty rows added to the top
-  // Pure function :)
-  this.clearRowsInGameGrid = function (completedRows, gameGrid) {
-  
-    // ALSO TODO: INCREASE SCORE FOR EACH COMPLETED ROW
-  
-    console.log("called clearRowsInGameGrid");
-  
-    let newGameGrid = Array.from(gameGrid);
-  
-    // For each completed row, remove it from gameGrid and add a new empty row to the top
-    completedRows.forEach( rowIndex => {
-      newGameGrid.splice(rowIndex, 1);
-      newGameGrid.unshift( new Array(cols).fill(0) );
-    });
-  
-    return newGameGrid;
-  }
+ 
   
   // Remove and shift down squares as needed after rows have been completed
   this.clearAndUpdateSquares = function (completedRows, fallenSquares) {
