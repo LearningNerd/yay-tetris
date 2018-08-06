@@ -83,12 +83,8 @@ export function Tetris (rows, cols) {
       gameGrid = this.updateGameGrid(prevSquares, currentTetromino.squares, gameGrid); 
 
     // Otherwise, if the newest tetromino has no room and it's sitting above the screen, game over!
-    } else if (this.isOffScreen(currentTetromino, gameGrid)) {
-  
-      // TEMPORARILY TURNING THIS OFF -- BUG: if any move has any type of collision while tetromino is at top of screen, false positive! 
-      // this.endGame();
-   
     } 
+  
     // Otherwise if the current tetromino has landed
     // } else {
   
@@ -140,6 +136,13 @@ export function Tetris (rows, cols) {
         // Otherwise if current tetromino has landed, drop the next one!
         currentTetromino = this.createTetromino(0,0); // NOTE: entire tetromino appears on screen all at once, by design. (this varies in different versions of tetris)
         console.log("****** Dropping next tetromino! *******");        
+     
+
+        // Immediately check if the next new tetromino has room to move down the screen 
+        if ( this.overlapsOtherSquares(currentTetromino, gameGrid) ) {
+          console.log("new tetromino does NOT have room below");
+          this.endGame();
+        }
 
       }
     }
@@ -187,15 +190,12 @@ export function Tetris (rows, cols) {
   }; 
 
 
-  // Return true if any of the tetromino's squares are at the very top of the screen, or off the screen
-  this.isOffScreen = function (currentTetromino, gameGrid) {
+  // Return true if any of current tetromino's squares lie on top of occupied squares of the gameGrid
+  this.overlapsOtherSquares = function (currentTetromino, gameGrid) {
 
-    console.log("called isOffScreen");
-    console.log(currentTetromino.squares);
-
-    for (let square of currentTetromino.squares) {
-      if (square.row <= 0) {
-        console.log("square at " + square.row + ", " + square.col + " is at top of screen or off screen!");
+     for (let square of currentTetromino.squares) {
+      if (gameGrid[square.row] && gameGrid[square.row][square.col] === 1) {
+        console.log("square at " + square.row + ", " + square.col + "overlaps another square!!!!");
         return true;
       }
     }
@@ -205,6 +205,8 @@ export function Tetris (rows, cols) {
     return false;
 
   };
+
+
 
   // Return true if there's room for the next move
   // FOR NOW, ONLY CHECKING BELOW BLOCK (not left or right) 
