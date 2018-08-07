@@ -68,12 +68,18 @@ export function Tetromino (row, col) {
   // and set centerSquare as its own property of this tetromino!
   this.updateSquares = function(shape, topLeftRow, topLeftCol, color) {
 
-    return shape.map( (row, rowIndex) => {
+    let centerRow;
+    let centerCol;
+
+    let newSquares = shape.map( (row, rowIndex) => {
       return row.map ( (square, colIndex) => {
         if (square > 0) { // if this is a 1 or a 2, make a square object
           let newSquare = new Square(topLeftRow + rowIndex, topLeftCol + colIndex, color);
           // If this is a 2, save a reference to this square object as tetromino's centerSquare property
-          if (square === 2) { this.centerSquare = newSquare; }
+          if (square === 2) {
+            centerRow = newSquare.row; 
+            centerCol = newSquare.col;
+          }
           return newSquare;
         }
       }).filter(elem => elem != undefined);
@@ -82,7 +88,14 @@ export function Tetromino (row, col) {
        return accum.concat(elem);
     }, []);
 
+    console.log("squares generated:");
+    console.log([...newSquares]);
+
+    this.centerSquare = new Square(centerRow, centerCol, color);
+
     console.log("center square: " + this.centerSquare.row + ", " + this.centerSquare.col);
+
+    return newSquares;
   
   }; //end updateSquares
 

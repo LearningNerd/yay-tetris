@@ -36,6 +36,10 @@ export function Tetris (rows, cols) {
   let fallenSquares = [];
   let currentTetromino = new Tetromino(-1,0); // initialize game with first Tetromino, starts above screen because drawing loop runs once on page load and will move it down immediately
 
+  console.log("**** INITIALIZED FIRST TETROMINO ****");
+  console.log([...currentTetromino.squares]);
+  console.log({...currentTetromino});
+
   let lastTickTimestamp = 0; // for now, number of frames
   
   // Generate 2D array based on rows / cols, each element populated with 0s
@@ -64,7 +68,10 @@ export function Tetris (rows, cols) {
 
     // Save current tetromino's squares to fallenSquares array
     fallenSquares = [...fallenSquares, ...currentTetromino.squares];
-    
+
+    console.log("new tetromin's squares:");
+    console.log([...currentTetromino.squares]);   
+ 
     return new Tetromino(row, col);
   
   }
@@ -95,6 +102,8 @@ export function Tetris (rows, cols) {
       currentTetromino = currentTetromino.move(nextMove);
 
       gameGrid = this.updateGameGrid(prevSquares, currentTetromino.squares, gameGrid); 
+
+      
 
     } 
   
@@ -274,6 +283,11 @@ export function Tetris (rows, cols) {
   // TODO: pass in nextMove param ???
   this.updateGameGrid = function(prevSquares, newSquares, gameGrid) {
     console.log("called updateGameGrid");
+
+    console.log("prev quesres:");
+    console.log(prevSquares);
+    console.log("new sq:");
+    console.log(newSquares);
 
     // Modify a copy of previous gameGrid, return new array instead of mutating
     let newGameGrid = [...gameGrid];
