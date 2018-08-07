@@ -25,26 +25,26 @@ export function Tetromino (row, col) {
     ],
   
     // "I" shape:
-    [[1,1,1,1]],
+    [[1,2,1,1]],
   
     // "T" shape:
     [
       [1,0],
-      [1,1],
+      [2,1],
       [1,0]
     ],
 
     // "L" shape (reflection of "J" shape)  
     [  
       [1,0],
-      [1,0],
+      [2,0],
       [1,1]
     ],
  
     // "S" shape (reflection of "Z" shape) 
     [   // NOTE: shapeZ is the reflection of shapeS
       [1,0],
-      [1,1],
+      [2,1],
       [0,1]
     ]
   ];
@@ -65,18 +65,24 @@ export function Tetromino (row, col) {
   this.color = colors[getRandomIntInclusive(0, colors.length-1)];
 
   // Output flat array of square objects with coordinates based on shape (2d array) and top left coords
+  // and set centerSquare as its own property of this tetromino!
   this.updateSquares = function(shape, topLeftRow, topLeftCol, color) {
 
     return shape.map( (row, rowIndex) => {
       return row.map ( (square, colIndex) => {
-        if (square) { // if this is a 1
-          return new Square(topLeftRow + rowIndex, topLeftCol + colIndex, color);
+        if (square > 0) { // if this is a 1 or a 2, make a square object
+          let newSquare = new Square(topLeftRow + rowIndex, topLeftCol + colIndex, color);
+          // If this is a 2, save a reference to this square object as tetromino's centerSquare property
+          if (square === 2) { this.centerSquare = newSquare; }
+          return newSquare;
         }
       }).filter(elem => elem != undefined);
   
     }).reduce( (accum, elem) => {
        return accum.concat(elem);
     }, []);
+
+    console.log("center square: " + this.centerSquare.row + ", " + this.centerSquare.col);
   
   }; //end updateSquares
 
@@ -89,48 +95,29 @@ export function Tetromino (row, col) {
   this.rotate = function(clockwise) {
     // For now, just clockwise ... later could use this param as a boolean to indicate direction
 
-    let prevRowLength = this.shape.length;
-    let prevColLength = this.shape[0].length;
+    console.log("called rotate");
 
-    let newRowLength = prevColLength;
-    let newColLength = prevRowLength;
+    let rotatedSquares = this.squares.map(curSquare => {
 
-    let newShape = [];
+      console.log("center square: " + this.centerSquare.row + ", " + this.centerSquare.col);
 
-    // For each row in the new shape,
-    for (let newRowIndex = 0; newRowIndex < newRowLength; newRowIndex++) {
+      let origRowOffset = curSquare.row - this.centerSquare.row;
+      let origColOffset = curSquare.col - this.centerSquare.col;
 
-      // Create a nested array for each row
-      newShape.push([]);
+      console.log("cur square: " + curSquare.row + ", " + curSquare.col);
+      console.log("offset from center: " + origRowOffset + ", " + origColOffset);
 
-      // For each column in the new shape / each row in the previous shape:
-      for (let newColIndex = 0, prevRowIndex = prevRowLength - 1; newColIndex < newColLength; newColIndex++, prevRowIndex--) {
-  
-        // Copy the value, following clockwise rotation
-        // -- last row becomes first column, first row becomes last column
-        newShape[newRowIndex][newColIndex] = this.shape[prevRowIndex][newRowIndex];
-      }
-    }
+      let newRow = this.centerSquare.row + origColOffset;
+      let newCol = this.centerSquare.col - origRowOffset;
 
-    console.log("rotated shape:");
-    console.log(newShape);
+      console.log("rotate: (" + curSquare.row + "," + curSquare.col + ") >> (" + newRow + "," + newCol + ")");
 
-    console.log("topleftrow: " + this.topLeftRow + ", topleftcol: " + this.topLeftCol);
-    console.log("squares before rotate:");
-    console.log([...this.squares]);
+      return new Square(newRow, newCol, this.color);
+    });
 
+    console.log(rotatedSquares);
 
-    // Update this tetromino's shape
-    this.shape = newShape;
-
-    // Regenerate squares array from new shape, maintaining top left coordinate (may need to change this!!!!!)
-    this.squares = this.updateSquares(this.shape, this.topLeftRow, this.topLeftCol, this.color);
-
-    console.log("squares after rotate:");
-    console.log(this.squares);
-
-    // TODO: figure out exactly how the shape gets rotated ... keep the center square at the same base coord?
-    // ....and how does this interact with collision detection?
+    this.squares = rotatedSquares;
 
   };//end rotate()
 
@@ -159,9 +146,15 @@ export function Tetromino (row, col) {
       return {row: square.row + rowOffset, col: square.col + colOffset, color: square.color};
     });
 
+    // TODO: don't need this anymore.... don't need to store this as a property anymore at all!
     this.topLeftRow = this.topLeftRow + rowOffset;
     this.topLeftCol = this.topLeftCol + colOffset;
+ 
+    // NOTE: mutating this object; TODO: generate a new square object here instead 
+    this.centerSquare.row = this.centerSquare.row + rowOffset;
+    this.centerSquare.col = this.centerSquare.col + colOffset;
   
+
     // return this tetromino object (with updated squares array):
     return this;
    
