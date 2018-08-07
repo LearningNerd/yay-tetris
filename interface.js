@@ -168,6 +168,9 @@ function p5jsInstance ( p5js) {
       } else if (p5js.keyCode === p5js.RIGHT_ARROW) {
         nextMove = "right";
         console.log("Key pressed: right");
+      } else if (p5js.keyCode === p5js.UP_ARROW) {
+        nextMove = "rotate";
+        console.log("Key pressed: up");
       } else {
         nextMove = "down";
         console.log("Key pressed: default to move down");
