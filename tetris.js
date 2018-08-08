@@ -65,12 +65,18 @@ export function Tetris (rows, cols) {
     
     console.log(" *** CREATING TETROMINO ***");
     // console.log(row + ", " + col);
-
+    
+    console.log("old fallenSquares:");
+    console.log([...fallenSquares]);
+ 
     // Save current tetromino's squares to fallenSquares array
     fallenSquares = [...fallenSquares, ...currentTetromino.squares];
 
     console.log("new tetromin's squares:");
     console.log([...currentTetromino.squares]);   
+
+    console.log("new fallenSquares:");
+    console.log([...fallenSquares]);
  
     return new Tetromino(row, col);
   
@@ -93,20 +99,24 @@ export function Tetris (rows, cols) {
     console.log("gameGrid before updating:");
     this.print(gameGrid);
 
+    // Save copy of original coordinates
+    let prevSquares = [...currentTetromino.squares];
+    
+    // Get updated tetromino object with updated coordinates for potential move
+    let updatedTetromino = currentTetromino.getNewTetromino(nextMove);
+    console.log("updatedTetromino obj:");
+    console.log(updatedTetromino);
+    this.print(gameGrid);
 
-    if (this.hasRoomForNextMove(currentTetromino, nextMove, gameGrid)) {
+    if (!this.overlapsOtherSquares(updatedTetromino, gameGrid, prevSquares)) {
 
-      let prevSquares = [...currentTetromino.squares];
-
-      // Get updated tetromino object with updated squares array
-      currentTetromino = currentTetromino.move(nextMove);
+      currentTetromino = updatedTetromino;
 
       gameGrid = this.updateGameGrid(prevSquares, currentTetromino.squares, gameGrid); 
 
-      
-
     } 
   
+    this.print(gameGrid);
        
     // TODO --- refactor this, repetitive!!!
     // On every X ticks / milliseconds, move the block down (regardless of user inputs)
@@ -114,13 +124,18 @@ export function Tetris (rows, cols) {
 
       console.log("time to move the block down!!!!!!!!!!!!!!!");
 
+      // Save copy of original coordinates
+      let prevSquares = [...currentTetromino.squares];
+      
+      // Get updated tetromino object with updated coordinates for potential move
+      let updatedTetromino = currentTetromino.getNewTetromino("down");
+      console.log("updatedTetromino obj:");
+      console.log(updatedTetromino);
+
       // Move down the current tetromino if there's room below:
-      if (this.hasRoomForNextMove(currentTetromino, "down", gameGrid)) {
+      if (!this.overlapsOtherSquares(updatedTetromino, gameGrid, prevSquares)) {
 
-        let prevSquares = [...currentTetromino.squares];
-
-        // Get updated tetromino object with updated squares array
-        currentTetromino = currentTetromino.move("down");
+        currentTetromino = updatedTetromino;
 
         gameGrid = this.updateGameGrid(prevSquares, currentTetromino.squares, gameGrid); 
  
@@ -162,11 +177,24 @@ export function Tetris (rows, cols) {
 
 
   // Return true if any of current tetromino's squares lie on top of occupied squares of the gameGrid
-  this.overlapsOtherSquares = function (currentTetromino, gameGrid) {
+  this.overlapsOtherSquares = function (currentTetromino, gameGrid, prevSquares) {
 
+    let prevCoords = [];
+
+    // If prevSquares argument is given,
+    if (prevSquares != undefined) {
+      // Keep an array of coordinates to ignore for collisions
+      for (let prevSquare of prevSquares) {
+        prevCoords.push(prevSquare.row + "-" + prevSquare.col); 
+      }
+    }
+
+    // For each updated square, there's a collision if the row or col is off the grid,
+    // OR if it overlaps an existing square on the grid (excluding previous coords of the current tetromino)
      for (let square of currentTetromino.squares) {
-      if (gameGrid[square.row] && gameGrid[square.row][square.col] === 1) {
-        console.log("square at " + square.row + ", " + square.col + "overlaps another square!!!!");
+      
+      if (!gameGrid[square.row] || ( gameGrid[square.row][square.col] !== 0 && !prevCoords.includes(square.row+"-"+square.col) )  ) {
+        console.log("square at " + square.row + ", " + square.col + "has a collision!!!");
         return true;
       }
     }
@@ -177,106 +205,6 @@ export function Tetris (rows, cols) {
 
   };
 
-
-
-  // Return true if there's room for the next move
-  // FOR NOW, ONLY CHECKING BELOW BLOCK (not left or right) 
-  this.hasRoomForNextMove = function(currentTetromino, nextMove, gameGrid) {
-    console.log("called hasRoomForNextMove: " + nextMove);
-
-    console.log("shape:");
-    console.log(currentTetromino.shape);
-
-    // Set which squares / grid spaces to check based on the next move:
-    let rowOffsetToCheck = 1; // default is 1; change for left/right
-    let colOffsetToCheck = 0; // default is 0; change for left/right
-
-    // For checking squares against each other within the tetromino, since this only checks each unique pair once, it checks in order of the array of squares: top to bottom, left to right -- so looking to the right of each square works, but looking to the left doesn't work (because we're already on the left-most square when we check each pair!)
-    // SOLUTION (for now): always check to the right, but switch which square in the pair is pushed into indexesToRemove based on left/right
-    if (nextMove === "left" || nextMove === "right") {
-      rowOffsetToCheck = 0;
-      colOffsetToCheck = 1;
-    } 
-
-    // Compile list of edge squares
-    // NOTE: This is so complicated!!! Surely I can refactor this quite a bit. But for now, at least it works. =P
-    let squares = [...currentTetromino.squares];
-    let indexesToRemove = [];
-
-    for (let outerIndex = 0; outerIndex < squares.length; outerIndex++) {
-
-      for (let innerIndex = outerIndex + 1; innerIndex < squares.length; innerIndex++) {
-
-        console.log(outerIndex + " vs " + innerIndex);
-        console.log("(" + squares[outerIndex].row + "," + squares[outerIndex].col + ") vs (" + squares[innerIndex].row + "," + squares[innerIndex].col + ")");
-
-          console.log("1st square's row plus offset: " + (squares[outerIndex].row + rowOffsetToCheck));
-          console.log("1st square's col plus offset: " + (squares[outerIndex].col + colOffsetToCheck));
-
-        // If the square being checked (outerIndex) has a square on its {lower/right/left} border, add it to indexesToRemove
-        if (squares[outerIndex].row + rowOffsetToCheck === squares[innerIndex].row && squares[outerIndex].col + colOffsetToCheck === squares[innerIndex].col)  {
-
-            console.log(squares[outerIndex].col + colOffsetToCheck + " matches " + squares[innerIndex].col);
-
-            console.log("remove this square from the list: index " + outerIndex + " - (" + squares[outerIndex].row + "," + squares[outerIndex].col + ")");
-
-            // If looking to the left, remove the OTHER square (the check is REVERSED!), see comment further up. yes, this is ugly and complicated right now. Gotta refactor this later, or at least try to! =P
-            if (nextMove === "left") {
-              indexesToRemove.push(innerIndex);
-            } else {
-              indexesToRemove.push(outerIndex);
-            }
-
-          } // end if square is not an edge square
-      
-      } // inner for
-    } // outer for
-
-    console.log("indexesToRemove:");
-    console.log(indexesToRemove);
-
-    let edgeSquares = squares.filter( (square, index) => !indexesToRemove.includes(index) ); 
-
-    console.log("edge squares: ");
-    console.log(edgeSquares);
-
-    // For checking gameGrid spaces, left/right positioning works fine:
-    if (nextMove === "left") {
-      rowOffsetToCheck = 0;
-      colOffsetToCheck = -1;
-    } else if (nextMove === "right") {
-      rowOffsetToCheck = 0;
-      colOffsetToCheck = 1;
-    }
-
-    // Check the grid space for the {lower/left/right} edge of each edge square; if any collisions, return false!
-    for (let square of edgeSquares) {
-
-      // If adjacent grid square is outside the range of gameGrid, or if the square does NOT have a value of 0 (if 1 or undefined/empty), collision!
-      if (!gameGrid[square.row + rowOffsetToCheck] || !gameGrid[square.col + colOffsetToCheck] || gameGrid[square.row + rowOffsetToCheck][square.col + colOffsetToCheck] !== 0) {
-        console.log("COLLISION DETECTED!");
-        console.log("checking row: " + (square.row + rowOffsetToCheck));
-        console.log("checking col: " + (square.col + colOffsetToCheck));
-      
-        return false;
-      } else {
-
-        console.log("No collision in this square:");
-        console.log("checking row: " + (square.row + rowOffsetToCheck));
-        console.log("checking col: " + (square.col + colOffsetToCheck));
-      
-      }
-
-    }
-
-    console.log("no game grid collisions detected; returning TRUE for hasRoomForNextMove");
-    this.print(gameGrid);
-    // If all the squares have room below, return true:
-    return true;
-
-  }; // end hasRoomForNextMove()
-
-  
 
   // Return updated game grid after switching squares on/off based on prev and next coords
   // TODO: update based on completed rows too, if any

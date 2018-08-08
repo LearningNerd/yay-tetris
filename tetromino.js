@@ -7,7 +7,7 @@ Tetromino:
   - color
   - shape
   - squares: array of square objects
-  - move (down, down/left, down/right)
+  - getNewTetromino (down, down/left, down/right)
 */
 
 
@@ -130,15 +130,16 @@ export function Tetromino (row, col) {
 
     console.log(rotatedSquares);
 
-    this.squares = rotatedSquares;
+    return {...this, squares: rotatedSquares};
 
   };//end rotate()
 
 
 
-  // *** params: "down", "left", "right"
-  this.move = function(nextMove) {
-    console.log("called move: " + nextMove);
+  // Return new Tetromino object resulting from the next move:
+  // *** params: "down", "left", "right", "rotate"
+  this.getNewTetromino = function(nextMove) {
+    console.log("called getNewTetromino: " + nextMove);
 
     // Set offset values based on nextMove
     let rowOffset = 1; // default for down
@@ -151,27 +152,21 @@ export function Tetromino (row, col) {
       rowOffset = 0;
       colOffset = 1;
     } else if (nextMove === "rotate") {
-      this.rotate();
+      // Return new copy of Tetromino that results from rotation
+      return this.rotate();
     }
- 
-    // MOVE THE SQUARES:
-    this.squares = this.squares.map( square => {
-      return {row: square.row + rowOffset, col: square.col + colOffset, color: square.color};
+
+    // If NOT rotating, update coordinates based on offset:
+    let newSquares = this.squares.map( square => {
+      return new Square(square.row + rowOffset, square.col + colOffset, square.color);
     });
 
-    // TODO: don't need this anymore.... don't need to store this as a property anymore at all!
-    this.topLeftRow = this.topLeftRow + rowOffset;
-    this.topLeftCol = this.topLeftCol + colOffset;
+    let newCenterSquare = new Square(this.centerSquare.row + rowOffset, this.centerSquare.col + colOffset, this.centerSquare.color);
  
-    // NOTE: mutating this object; TODO: generate a new square object here instead 
-    this.centerSquare.row = this.centerSquare.row + rowOffset;
-    this.centerSquare.col = this.centerSquare.col + colOffset;
-  
-
-    // return this tetromino object (with updated squares array):
-    return this;
+    // Return new copy of Tetromino object with updated properties:
+    return {...this, squares: newSquares, centerSquare: newCenterSquare};
    
-  }; // end this.move()
+  }; // end this.getNewTetromino()
   
   
 } //end Tetromino constructor
