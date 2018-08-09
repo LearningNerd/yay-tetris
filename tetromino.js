@@ -88,12 +88,18 @@ export function Tetromino (row, col) {
        return accum.concat(elem);
     }, []);
 
-    console.log("squares generated:");
-    console.log([...newSquares]);
+    // console.log("squares generated:");
+    // console.log([...newSquares]);
 
-    this.centerSquare = new Square(centerRow, centerCol, color);
+    // The centerSquare property is only defined for shapes with a center of rotation, so NOT for the "O" shape
+    if (centerRow == undefined || centerCol == undefined) {
+      this.centerSquare = undefined;
+      // console.log("Setting center square to undefined; this is an O shape!");
+    } else {
+      this.centerSquare = new Square(centerRow, centerCol, color);
+      // console.log("center square: " + this.centerSquare.row + ", " + this.centerSquare.col);
+    }
 
-    console.log("center square: " + this.centerSquare.row + ", " + this.centerSquare.col);
 
     return newSquares;
   
@@ -110,25 +116,31 @@ export function Tetromino (row, col) {
 
     console.log("called rotate");
 
+    // If no center of rotation (for the "O" shape), just return a copy of this tetromino as-is:
+    if ( this.centerSquare == undefined) {
+      console.log("No center of rotation. Returning this tetromino as-is.");
+      return {...this};
+    }
+
     let rotatedSquares = this.squares.map(curSquare => {
 
-      console.log("center square: " + this.centerSquare.row + ", " + this.centerSquare.col);
+      // console.log("center square: " + this.centerSquare.row + ", " + this.centerSquare.col);
 
       let origRowOffset = curSquare.row - this.centerSquare.row;
       let origColOffset = curSquare.col - this.centerSquare.col;
 
-      console.log("cur square: " + curSquare.row + ", " + curSquare.col);
-      console.log("offset from center: " + origRowOffset + ", " + origColOffset);
+      // console.log("cur square: " + curSquare.row + ", " + curSquare.col);
+      // console.log("offset from center: " + origRowOffset + ", " + origColOffset);
 
       let newRow = this.centerSquare.row + origColOffset;
       let newCol = this.centerSquare.col - origRowOffset;
 
-      console.log("rotate: (" + curSquare.row + "," + curSquare.col + ") >> (" + newRow + "," + newCol + ")");
+      // console.log("rotate: (" + curSquare.row + "," + curSquare.col + ") >> (" + newRow + "," + newCol + ")");
 
       return new Square(newRow, newCol, this.color);
     });
 
-    console.log(rotatedSquares);
+    // console.log(rotatedSquares);
 
     return {...this, squares: rotatedSquares};
 
@@ -161,8 +173,11 @@ export function Tetromino (row, col) {
       return new Square(square.row + rowOffset, square.col + colOffset, square.color);
     });
 
-    let newCenterSquare = new Square(this.centerSquare.row + rowOffset, this.centerSquare.col + colOffset, this.centerSquare.color);
- 
+    let newCenterSquare;
+    if (this.centerSquare != undefined) {
+      newCenterSquare = new Square(this.centerSquare.row + rowOffset, this.centerSquare.col + colOffset, this.centerSquare.color);
+    }
+
     // Return new copy of Tetromino object with updated properties:
     return {...this, squares: newSquares, centerSquare: newCenterSquare};
    
