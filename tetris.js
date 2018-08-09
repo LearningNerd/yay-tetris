@@ -1,36 +1,6 @@
 // import {p5} from "./node_modules/p5/lib/p5.min.js"
 import {Tetromino} from "./tetromino.js"
 
-/*
-
-Game:
-  - gameGrid
-  - squares -- array of all squares on the board 
-    --- OR just an array of squares??
-  - currentTetromino
-  - nextMove (left, right, or only down)
-
-  - createTetromino -- new tetromino, add squares to list of squares, update the current tetromino
-
-  - getCompletedRowIndexes -- input: gameGrid; output: array of row indexes to delete
-
-  - clearRows -- gameGrid, completedRowIndexes; output: new gameGrid
-    -- delete rows in gameGrid, add empty rows at the top, effectively shifting down all remaining rows. ***will need to change this!
-
-  - updateSquares -- CHANGE: update squares array, remove those from completedRowIndexes; .... 
-
-  - hasRoomForNextMove -- input: array of current tetromino's squares, gameGrid; output: true OR false (false if the move would cause a collision)
-  
-  - updateGameGrid -- input: array of current tetromino's squares (after calling hasRoom, updateTetrominoes, etcetc, gameGrid; output: new gameGrid 
-
-  - endGame -- display message
-
-  - gameLoopTick -- run once every animation frame in p5js, output array of squares to be drawn -- MOVE ALL GAME LOGIC TO HERE!
-
-  - updateNextMove -- input: left/right. update this.NextMove, to be used by other function calls ... ??
- 
-*/
-
 export function Tetris (rows, cols) {
 
   let fallenSquares = [];
@@ -41,14 +11,14 @@ export function Tetris (rows, cols) {
   console.log({...currentTetromino});
 
   let lastTickTimestamp = 0; // for now, number of frames
+
+  this.score = 0;
+  this.gameOver = false;
   
   // Generate 2D array based on rows / cols, each element populated with 0s
   let gameGrid = new Array(rows).fill(null).map(row => new Array(cols).fill(0));
   
   console.log("****** GRID CREATED *********");
-  // To see the grid in console:
-  // gameGrid.forEach(row => console.log(row));
- 
 
  
   // To see the grid in console:
@@ -161,6 +131,9 @@ export function Tetris (rows, cols) {
           let prevSquares = [...fallenSquares];
           fallenSquares = this.clearAndUpdateSquares(completedRows, fallenSquares);
           gameGrid = this.updateGameGrid(prevSquares, fallenSquares, gameGrid);
+
+          // Update score: for now, just the number of cleared rows:
+          this.score += completedRows.length;
         }
 
 
@@ -170,8 +143,12 @@ export function Tetris (rows, cols) {
     console.log("gameGrid after updating:");
     this.print(gameGrid);
 
-    // Return all squares in the game to be drawn on each frame:
-    return [...fallenSquares, ...currentTetromino.squares];
+    // Return for game state: squares array (previous and current), score number, and gameOver boolean
+    return {
+            score: this.score,
+            squares: [...fallenSquares, ...currentTetromino.squares],
+            gameOver: this.gameOver
+          };
   }; 
 
 
@@ -283,15 +260,9 @@ export function Tetris (rows, cols) {
  
   }
   
-  // Later: a nicer "game over" screen -- and turn off game loop / controls!
   this.endGame = function () {
     console.log("Game over!");
-    
-    // let x = document.body.innerHTML;
-    let elem = document.createElement("h1");
-    elem.textContent = "Game over!";
-    document.body.appendChild(elem);
-  
+    this.gameOver = true;   
   };
   
 }; // end Tetris() constructor

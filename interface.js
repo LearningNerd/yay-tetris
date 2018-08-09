@@ -66,11 +66,13 @@ function p5jsInstance ( p5js) {
     // based on key presses
 
     // RUN GAME LOOP ON EVERY FRAME, pass in nextMove
-    // and get array of squares to be drawn:
-    let squares = tetris.gameLoopTick(nextMove);
+    // and get back an updated game state
+    // Game state: sqaures array, score number, gameOver
+    let gameState = tetris.gameLoopTick(nextMove);
+
 
     // Draw ALL tetromino squares on each frame
-    squares.forEach( s => {
+    gameState.squares.forEach( s => {
   
       // Actual coordinates for drawing: multiple row/col by the blockSize (pixel value)
       let xPos = s.col * blockSize;
@@ -79,83 +81,26 @@ function p5jsInstance ( p5js) {
       p5js.fill(s.color); 
       p5js.rect(xPos, yPos, blockSize, blockSize);
     });
+
   
+    // Display score! (TODO: display as a DOM element? or expand canvas to have an area for the game and separate area for UI)
+    p5js.fill(0);
+    p5js.textSize(20);
+    p5js.textAlign("center");
+    p5js.text("Score: " + gameState.score, canvasWidth/2, 0 + 20); 
+
+
+    // If the game is over, say so! (TODO: replay option)
+    if (gameState.gameOver) {
+      p5js.fill("red");
+      p5js.textSize(25);
+      p5js.textAlign("center");
+      p5js.text("Game over!\n:(", canvasWidth/2, canvasHeight/2); 
+    }
+
+
 
   }; // end updated p5js draw()
-
-
-
-/*
-*********************** START OF PREV DRAW FUNCTION *********************
-
-  // Animation loop, runs once per frame
-  p5js.draw = function() {
-
-    console.log("Called p5js draw()");
-   
-    // Update coords based on which keys are currently being pressed
-    if (p5js.keyIsDown(p5js.LEFT_ARROW)) {
-     currentTetromino.moveLeft();
-     console.log("---- LEFT");
-    } else if (p5js.keyIsDown(p5js.RIGHT_ARROW)) {
-     currentTetromino.moveRight();
-     console.log("---- RIGHT");
-    }
-  
-    // Clear the canvas on each frame, with a background color
-    p5js.background("lightgrey");
-    
-    console.log("Tetrominoes array:");
-    console.log(tetrominoes);
-   
-    console.log("*******************");
-    console.log("cur coords: " + currentTetromino.row + ", " + currentTetromino.col);
-    console.log("*******************");
-  
-  
-    // If there's room below this tetromino, let it keep falling
-    if (currentTetromino.hasRoomBelow() ) {
-      console.log("has room below!");
-      currentTetromino.moveDown();  // update position for the next tick
-   
-    // Otherwise, if the newest tetromino has no room and it's sitting above the screen, game over!
-    } else if (currentTetromino.row === -1) {
-  
-      endGame();
-    
-    // Otherwise if the current tetromino has landed
-    } else {
-  
-      // Check for any completed rows
-      let completedRows = getCompletedRowIndexes(gameGrid);
-  
-      // If there are any, update the game grid and tetrominoes array to remove cleared rows and move down upper rows
-      if (completedRows.length !== 0) {
-        console.log("completedRows");
-        console.log(completedRows)
-  
-        gameGrid = clearRows(completedRows, gameGrid); 
-        tetrominoes = updateTetrominoes(tetrominoes, completedRows);
-      }
-      
-      // Drop the next tetromino
-      createTetromino(p5js);
-
-    } // end of if/elseif/else 
-
-    // Draw ALL tetrominoes on each frame, AFTER updating position 
-    tetrominoes.forEach( t => t.draw() );
-
-    for (x of tetrominoes) {
-   
-      x.draw();
-  
-    } // end for/of loop
-
-  }; // end p5js.draw
-
-*********************** END OF PREV DRAW FUNCTION *********************
-*/
 
 
   // Draw next frame when pressing any arrow key
