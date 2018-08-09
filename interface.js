@@ -24,11 +24,29 @@ let p5js = new p5(p5jsInstance);
 function p5jsInstance ( p5js) {
 
   // Params for drawing:
-  const rows = 12, cols = 6;
+  const rows = 20, cols = 10;
   const blockSize = 25;
-  const canvasWidth = blockSize * cols;
-  const canvasHeight = blockSize * rows;
+
+  const topMargin = 5;
+
+  const playfieldXPos = 75;
+  const playfieldYPos = topMargin;;
+
+  const playfieldWidth = blockSize * cols;
+  const playfieldHeight = blockSize * rows;
   
+  const canvasWidth = playfieldWidth * 3;
+  const canvasHeight = playfieldHeight + 75;
+
+  const nextQueueXPos = playfieldXPos + playfieldWidth + 0.65*playfieldWidth;
+  const nextQueueYPos = topMargin + 50;
+
+  const nextQueueWidth = blockSize * 4;
+  const nextQueueHeight = blockSize * rows;
+
+ 
+
+ 
   // Create instance of Tetris module
   let tetris = new Tetris(rows, cols);
 
@@ -57,17 +75,19 @@ function p5jsInstance ( p5js) {
   // FOR TESTING UPDATE WITH REAL TETROMINOES:
   p5js.draw = function() {
     // console.log("called draw()");
-    
-    // Clear the canvas on each frame, with a background color
-    p5js.background("lightgrey");
+
+    // Clear the canvas on each frame
+    p5js.clear();    
 
 
-    // TODO: Pass "left" or "right" to gameLoopTick
-    // based on key presses
+    // Draw the Tetris playfield
+    p5js.fill("#eee");
+    p5js.rect(playfieldXPos, playfieldYPos, playfieldWidth, playfieldHeight);
+   
 
     // RUN GAME LOOP ON EVERY FRAME, pass in nextMove
     // and get back an updated game state
-    // Game state: sqaures array, score number, gameOver
+    // Game state: sqaures array, score number, gameOver, and tetrominoQueue array
     let gameState = tetris.gameLoopTick(nextMove);
 
 
@@ -75,8 +95,8 @@ function p5jsInstance ( p5js) {
     gameState.squares.forEach( s => {
   
       // Actual coordinates for drawing: multiple row/col by the blockSize (pixel value)
-      let xPos = s.col * blockSize;
-      let yPos = s.row * blockSize;
+      let xPos = playfieldXPos + s.col * blockSize;
+      let yPos = playfieldYPos + s.row * blockSize;
    
       p5js.fill(s.color); 
       p5js.rect(xPos, yPos, blockSize, blockSize);
@@ -85,17 +105,59 @@ function p5jsInstance ( p5js) {
   
     // Display score! (TODO: display as a DOM element? or expand canvas to have an area for the game and separate area for UI)
     p5js.fill(0);
-    p5js.textSize(20);
+    p5js.textSize(25);
     p5js.textAlign("center");
-    p5js.text("Score: " + gameState.score, canvasWidth/2, 0 + 20); 
+    p5js.text("Score: " + gameState.score, canvasWidth/2, canvasHeight - 5);
+
+
+
+
+    // Draw background for queue of next tetrominoes
+    //    p5js.fill("#eee");
+    //    p5js.rect(nextQueueXPos, nextQueueYPos, nextQueueWidth, nextQueueHeight);
+
+    // Draw "Next" title:
+    p5js.fill(0);
+    p5js.textSize(25);
+    p5js.textAlign("center");
+    p5js.text("Next:", nextQueueXPos + (nextQueueWidth/2), nextQueueYPos - 30); 
+
+
+
+    // Starting coordinates for first tetromino in the queue
+    let nextXStart = nextQueueXPos;
+    let nextYStart = nextQueueYPos;
+
+    // Draw the next tetrominoes in the queue
+    gameState.tetrominoQueue.forEach( tetromino => {
+
+      let xPos;
+      let yPos;
+ 
+      tetromino.squares.forEach ( s => {
+
+        // Draw each square based on its coordinates but relative to the queue section
+        xPos = nextXStart + s.col * blockSize;
+        yPos = nextYStart + s.row * blockSize;
+   
+        p5js.fill(s.color); 
+        p5js.rect(xPos, yPos, blockSize, blockSize);
+           
+      }); 
+
+      // Next tetromino will be drawn below the previous one, with a margin of 1 row
+      nextYStart = yPos + blockSize * 2;
+
+    });
+
 
 
     // If the game is over, say so! (TODO: replay option)
     if (gameState.gameOver) {
       p5js.fill("red");
-      p5js.textSize(25);
+      p5js.textSize(50);
       p5js.textAlign("center");
-      p5js.text("Game over!\n:(", canvasWidth/2, canvasHeight/2); 
+      p5js.text("Game over!\n:(", canvasWidth/2, canvasHeight/2 - 50); 
     }
 
 

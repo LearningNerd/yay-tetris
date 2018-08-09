@@ -102,37 +102,75 @@ export function Tetris (rows, cols) {
   };
 
 
-  this.createTetromino  = function (row, col, currentTetromino) {
-    
-    console.log(" *** CREATING TETROMINO ***");
-    // console.log(row + ", " + col);
-    
-    console.log("old fallenSquares:");
-    console.log([...this.fallenSquares]);
+  // Generate an array of the next randomized tetrominoes
+  this.createTetrominoQueue = function (numberOfTetrominoes) {
 
-    if (currentTetromino) { 
-      // Save current tetromino's squares to fallenSquares array
-      this.fallenSquares = [...this.fallenSquares, ...currentTetromino.squares];
-  
-      console.log("new tetromin's squares:");
-      console.log([...currentTetromino.squares]);   
-  
+    console.log("called createTetrominoQueue");
+
+    return new Array(numberOfTetrominoes).fill(null).map(tetromino => {
+
+      // Assign a random shape to each new tetromino
+      let randomShape = tetrominoShapes[getRandomIntInclusive(0, tetrominoShapes.length-1)];
+
+     return new Tetromino(0, 0, randomShape);
+    });
+
+ };//end createTetrominoQueue
+ 
+
+
+  // Push new tetrominoes to the queue. Note: updates in place
+  this.addToTetrominoQueue = function (numberOfTetrominoes) {
+
+    console.log("called addToTetrominoQueue");
+
+    let tetrominoesToPush = new Array(numberOfTetrominoes).fill(null).map(tetromino => {
+
+      // Assign a random shape to each new tetromino
+      let randomShape = tetrominoShapes[getRandomIntInclusive(0, tetrominoShapes.length-1)];
+
+      return new Tetromino(0, 0, randomShape);
+    });
+
+    // Add new tetrominoes to the end of the queue
+    this.tetrominoQueue = [...this.tetrominoQueue, ...tetrominoesToPush];
+
+  };// end addToTetrominoQueue
+
+
+
+  // Set the next current tetromino, update queue, update fallenSquares
+  // Note: updates multiple things in place!
+  this.incrementTetromino = function () {
+    
+    console.log("called incrementTetromino");
+
+    // Save current tetromino's squares (if currentTetromino was already initialized
+    if (this.currentTetromino) {
+      this.fallenSquares = [...this.fallenSquares, ...this.currentTetromino.squares];
+
       console.log("new fallenSquares:");
       console.log([...this.fallenSquares]);
     }
-    
-    // Assign a random shape to each new tetromino
-    let randomShape = tetrominoShapes[getRandomIntInclusive(0, tetrominoShapes.length-1)];
-
-    console.log("ranodm shape:");
-    console.log(randomShape);
-
-    return new Tetromino(row, col, randomShape);
   
-  }
+    // Add another tetromino to the queue each time
+    this.addToTetrominoQueue(1);
+  
+    // Return the next current tetromino (and removes it from queue)
+    return this.tetrominoQueue.shift();
  
+  };// end incrementTetromino
 
-  this.currentTetromino = this.createTetromino(-1,0); // initialize game with first Tetromino, starts above screen because drawing loop runs once on page load and will move it down immediately
+
+
+  // Initialize queue
+  this.tetrominoQueue = this.createTetrominoQueue(4);
+
+  console.log([...this.tetrominoQueue]);
+
+  // Initialize current tetromino (and queue will now contain 1 less!)
+  this.currentTetromino = this.incrementTetromino();
+
 
   console.log("**** INITIALIZED FIRST TETROMINO ****");
   console.log([...this.currentTetromino.squares]);
@@ -199,13 +237,17 @@ export function Tetris (rows, cols) {
       } else {
        
         // Otherwise if current tetromino has landed, drop the next one!
-        this.currentTetromino = this.createTetromino(0,0); // NOTE: entire tetromino appears on screen all at once, by design. (this varies in different versions of tetris)
-        console.log("****** Dropping next tetromino! *******");        
-     
+        this.currentTetromino = this.incrementTetromino();
+   
+        console.log(this.currentTetromino);
+        this.print(this.gameGrid); 
 
         if ( this.overlapsOtherSquares(this.currentTetromino, this.gameGrid) ) {
           console.log("new tetromino overlaps; game over!");
           this.gameOver = true;
+        } else {
+          // Otherwise if the new Tetromino DOES fit, immediately update the gameGrid
+          this.gameGrid = this.updateGameGrid(this.currentTetromino.squares, this.currentTetromino.squares, this.gameGrid); 
         }
 
  
@@ -233,7 +275,8 @@ export function Tetris (rows, cols) {
     return {
             score: this.score,
             squares: [...this.fallenSquares, ...this.currentTetromino.squares],
-            gameOver: this.gameOver
+            gameOver: this.gameOver,
+            tetrominoQueue: this.tetrominoQueue
           };
   }; 
 
