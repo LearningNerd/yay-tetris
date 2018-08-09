@@ -1,17 +1,89 @@
 // import {p5} from "./node_modules/p5/lib/p5.min.js"
 import {Tetromino} from "./tetromino.js"
+import {getRandomIntInclusive} from "./helperFunctions.js";
 
 export function Tetris (rows, cols) {
 
+  // Hard-coded: tetromino shapes and colors!
+      // NOTE: 2 represents center of rotation 
+  const tetrominoShapes = [
+    {
+      shapeName: "O",
+      color: "#47fffd",  // cyan
+      shapeTemplate:
+      [
+        [1,1],
+        [1,1]
+      ]
+    },
+  
+    { 
+      shapeName: "I",
+      color: "#ffeaa7", // yellow
+      shapeTemplate: [[1,2,1,1]]
+    },
+
+    {
+      shapeName: "T",
+      color: "#c4b1ff", // purple
+      shapeTemplate:
+      [
+        [1,0],
+        [2,1],
+        [1,0]
+      ]
+    },
+
+    {
+      shapeName: "L",
+      color: "#ffb347", // orange
+      shapeTemplate:
+      [
+        [1,0],
+        [2,0],
+        [1,1]
+      ]
+    },
+ 
+    {
+      shapeName: "J",
+      color: "#62b1ff", // blue
+      shapeTemplate:
+      [
+        [0,1],
+        [0,2],
+        [1,1]
+      ]
+    },
+     
+    {
+      shapeName: "S",
+      color: "#a8e4a0", // green
+      shapeTemplate: 
+      [
+        [1,0],
+        [2,1],
+        [0,1]
+      ]
+    },
+    
+    {
+      shapeName: "Z",
+      color: "#ff7675", // red
+      shapeTemplate: 
+      [
+        [0,1],
+        [1,2],
+        [1,0]
+      ]
+    }
+  ];//end shapes
+
+
+
   let fallenSquares = [];
-  let currentTetromino = new Tetromino(-1,0); // initialize game with first Tetromino, starts above screen because drawing loop runs once on page load and will move it down immediately
-
-  console.log("**** INITIALIZED FIRST TETROMINO ****");
-  console.log([...currentTetromino.squares]);
-  console.log({...currentTetromino});
-
   let lastTickTimestamp = 0; // for now, number of frames
-
+  let currentTetromino;
   this.score = 0;
   this.gameOver = false;
   
@@ -38,20 +110,35 @@ export function Tetris (rows, cols) {
     
     console.log("old fallenSquares:");
     console.log([...fallenSquares]);
- 
-    // Save current tetromino's squares to fallenSquares array
-    fallenSquares = [...fallenSquares, ...currentTetromino.squares];
 
-    console.log("new tetromin's squares:");
-    console.log([...currentTetromino.squares]);   
+    if (currentTetromino) { 
+      // Save current tetromino's squares to fallenSquares array
+      fallenSquares = [...fallenSquares, ...currentTetromino.squares];
+  
+      console.log("new tetromin's squares:");
+      console.log([...currentTetromino.squares]);   
+  
+      console.log("new fallenSquares:");
+      console.log([...fallenSquares]);
+    }
+    
+    // Assign a random shape to each new tetromino
+    let randomShape = tetrominoShapes[getRandomIntInclusive(0, tetrominoShapes.length-1)];
 
-    console.log("new fallenSquares:");
-    console.log([...fallenSquares]);
- 
-    return new Tetromino(row, col);
+    console.log("ranodm shape:");
+    console.log(randomShape);
+
+    return new Tetromino(row, col, randomShape);
   
   }
-  
+ 
+
+  currentTetromino = this.createTetromino(-1,0); // initialize game with first Tetromino, starts above screen because drawing loop runs once on page load and will move it down immediately
+
+  console.log("**** INITIALIZED FIRST TETROMINO ****");
+  console.log([...currentTetromino.squares]);
+  console.log({...currentTetromino});
+ 
  
   this.gameLoopTick = function(nextMove) {
 

@@ -1,4 +1,3 @@
-import {getRandomIntInclusive} from "./helperFunctions.js";
 import {Square} from "./square.js";
 
 
@@ -11,103 +10,45 @@ Tetromino:
 */
 
 
-export function Tetromino (row, col) {
+export function Tetromino (topLeftRow, topLeftCol, shape) {
 
   console.log("****** TETROMINO CONSTRUCTOR CALLED *********");
 
-  const colors = ["#ffeaa7", "#55efc4", "#74b9ff", "#ff7675"];
- 
-  const shapes = [
-    // "O" shape:
-    [
-      [1,1],
-      [1,1]
-    ],
-  
-    // "I" shape:
-    [[1,2,1,1]],
-  
-    // "T" shape:
-    [
-      [1,0],
-      [2,1],
-      [1,0]
-    ],
+  this.color = shape.color;
+  this.shapeName = shape.shapeName;
+  this.shapeTemplate = shape.shapeTemplate;
 
-    // "L" shape (reflection of "J" shape)  
-    [  
-      [1,0],
-      [2,0],
-      [1,1]
-    ],
- 
-    // "S" shape (reflection of "Z" shape) 
-    [   // NOTE: shapeZ is the reflection of shapeS
-      [1,0],
-      [2,1],
-      [0,1]
-    ]
-  ];
-
-
-  // ****TODO: set default row/col starting pos (middle of canvas?)
-  this.topLeftRow = row;
-  this.topLeftCol = col;
-
-  // console.log(this.topLeftRow + ", " + this.topLeftCol);
-
-  // Assign a random shape to each new tetromino
-  this.shape = shapes[getRandomIntInclusive(0, shapes.length-1)];
-
-  // console.log(this.shape);
-
-  // Each new tetromino has a random color
-  this.color = colors[getRandomIntInclusive(0, colors.length-1)];
-
-  // Output flat array of square objects with coordinates based on shape (2d array) and top left coords
+  // Generate flat array of square objects with coordinates based on 2d array shapeTemplate and top left coords
   // and set centerSquare as its own property of this tetromino!
-  this.updateSquares = function(shape, topLeftRow, topLeftCol, color) {
-
-    let centerRow;
-    let centerCol;
-
-    let newSquares = shape.map( (row, rowIndex) => {
-      return row.map ( (square, colIndex) => {
-        if (square > 0) { // if this is a 1 or a 2, make a square object
-          let newSquare = new Square(topLeftRow + rowIndex, topLeftCol + colIndex, color);
-          // If this is a 2, save a reference to this square object as tetromino's centerSquare property
-          if (square === 2) {
-            centerRow = newSquare.row; 
-            centerCol = newSquare.col;
-          }
-          return newSquare;
+  let centerRow;
+  let centerCol;
+  
+  this.squares = this.shapeTemplate.map( (row, rowIndex) => {
+    return row.map ( (square, colIndex) => {
+      if (square > 0) { // if this is a 1 or a 2, make a square object
+        let newSquare = new Square(topLeftRow + rowIndex, topLeftCol + colIndex, this.color);
+        // If this is a 2, save a reference to this square object as tetromino's centerSquare property
+        if (square === 2) {
+          centerRow = newSquare.row; 
+          centerCol = newSquare.col;
         }
-      }).filter(elem => elem != undefined);
+        return newSquare;
+      }
+    }).filter(elem => elem != undefined);
   
-    }).reduce( (accum, elem) => {
-       return accum.concat(elem);
-    }, []);
-
-    // console.log("squares generated:");
-    // console.log([...newSquares]);
-
-    // The centerSquare property is only defined for shapes with a center of rotation, so NOT for the "O" shape
-    if (centerRow == undefined || centerCol == undefined) {
-      this.centerSquare = undefined;
-      // console.log("Setting center square to undefined; this is an O shape!");
-    } else {
-      this.centerSquare = new Square(centerRow, centerCol, color);
-      // console.log("center square: " + this.centerSquare.row + ", " + this.centerSquare.col);
-    }
-
-
-    return newSquares;
+  }).reduce( (accum, elem) => {
+     return accum.concat(elem);
+  }, []);
   
-  }; //end updateSquares
-
-
-  // ON INSTANTIATION, generate internal squares array:
-  this.squares = this.updateSquares(this.shape, this.topLeftRow, this.topLeftCol, this.color);
+  // The centerSquare property is only defined for shapes with a center of rotation, so NOT for the "O" shape
+  if (centerRow == undefined || centerCol == undefined) {
+    this.centerSquare = undefined;
+    // console.log("Setting center square to undefined; this is an O shape!");
+  } else {
+    this.centerSquare = new Square(centerRow, centerCol, this.ca7ffeaolor);
+    // console.log("center square: " + this.centerSquare.row + ", " + this.centerSquare.col);
+  }
+  
 
   
   // Rotate clockwise (for now) -- update shape, no output
