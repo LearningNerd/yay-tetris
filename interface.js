@@ -90,18 +90,27 @@ function p5jsInstance ( p5js) {
       if (p5js.keyIsDown(p5js.LEFT_ARROW)) {
         nextMove = "left";
         console.log("Key pressed: left");
+
       } else if (p5js.keyIsDown(p5js.RIGHT_ARROW)) {
         nextMove = "right";
         console.log("Key pressed: right");
+
       } else if (p5js.keyIsDown(p5js.UP_ARROW) || p5js.keyIsDown(88)) {
         nextMove = "rotate-clockwise";
         console.log("Key pressed: up or X");
+
       } else if (p5js.keyIsDown(p5js.CONTROL) || p5js.keyIsDown(90)) {
         nextMove = "rotate-counterclockwise";
         console.log("Key pressed: Ctrl or Z");
+
       } else if (p5js.keyIsDown(p5js.DOWN_ARROW)) {
         nextMove = "soft-drop";
         console.log("Key pressed: down");
+
+      } else if (p5js.keyIsDown(32)) {
+        nextMove = "hard-drop";
+        console.log("Key pressed: space");
+
       } else {
         nextMove = undefined;
         console.log("No key pressed; reset nextMove to undefined");
@@ -194,7 +203,7 @@ function p5jsInstance ( p5js) {
   p5js.keyPressed = function() {
     //if (p5js.keyCode === p5js.LEFT_ARROW || p5js.keyCode === p5js.RIGHT_ARROW || p5js.keyCode === p5js.UP_ARROW || p5js.keyCode === p5js.DOWN_ARROW) {
 
-    p5js.redraw();
+     p5js.redraw();
 
     if (gameOver) {
       p5js.noLoop();      

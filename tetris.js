@@ -195,7 +195,7 @@ export function Tetris (rows, cols) {
     console.log("lastTick: " + this.lastTickTimestamp);  
  
     // Handle left/right/rotate on EVERY TICK
-    if (nextMove != "soft-drop" && nextMove != undefined) {
+    if (nextMove !== "hard-drop" && nextMove !== "soft-drop" && nextMove != undefined) {
 
      
       console.log("gameGrid before updating:");
@@ -222,41 +222,64 @@ export function Tetris (rows, cols) {
 
     } // end if move is not down or undefined
 
-    // On every X ticks / milliseconds, move the block down (regardless of user inputs)
-    if (nextMove === "soft-drop" || this.lastTickTimestamp % 5 === 0) {
 
-      console.log("time to move the block down!!!!!!!!!!!!!!!");
+
+    // if (nextMove === "hard-drop") {
+    // On every X ticks / milliseconds, move the block down (regardless of user inputs)
+    if (nextMove === "hard-drop" || nextMove === "soft-drop" || nextMove === undefined ||  this.lastTickTimestamp % 5 === 0) {
+
+      console.log("Time to move the block down!!! Next move: " + nextMove);
 
       // Save copy of original coordinates
       let prevSquares = [...this.currentTetromino.squares];
-      
+ 
       // Get updated tetromino object with updated coordinates for potential move
       let updatedTetromino = this.currentTetromino.getNewTetromino("down");
-      console.log("updatedTetromino obj:");
-      console.log(updatedTetromino);
 
-      // Move down the current tetromino if there's room below:
-      if (!this.overlapsOtherSquares(updatedTetromino, this.gameGrid, prevSquares)) {
+      // If no collisions, run the loop at least ONCE; for hard-drop, run until collisions is detected
+      let repeatLoop = true;
+      let roomBelow = false;
 
+      // Continuosly move down the current tetromino as long as there's still room below:
+      while (!this.overlapsOtherSquares(updatedTetromino, this.gameGrid, prevSquares) && repeatLoop) {
+
+        // If this is NOT toggled, trigger the ELSE condition for the condition above (no such thing as a while/else?)
+        roomBelow = true;
+        
+        // Only run this loop once if this is not a hard drop
+        if (nextMove !== "hard-drop") { repeatLoop = false;}
+
+        // Save the new coordinates (so if loop ends after this iteration, this will be the final move)
         this.currentTetromino = updatedTetromino;
+      
+        // Get updated tetromino object with updated coordinates for potential move
+        updatedTetromino = updatedTetromino.getNewTetromino("down");
+        console.log("updatedTetromino obj:");
+        console.log(updatedTetromino);
+      }
+      // Once a collision has been detected, update the game grid to reflect the update
+      // (or if no move is possible at all, 
+      this.gameGrid = this.updateGameGrid(prevSquares, this.currentTetromino.squares, this.gameGrid); 
 
-        this.gameGrid = this.updateGameGrid(prevSquares, this.currentTetromino.squares, this.gameGrid); 
- 
+     
       // Otherwise if the current tetromino has landed (and fits on the screen), drop the next one!
-      } else {
+      if (!roomBelow) {
        
-        // Otherwise if current tetromino has landed, drop the next one!
+        // Drop the next tetromino
         this.currentTetromino = this.incrementTetromino();
    
         console.log(this.currentTetromino);
         this.print(this.gameGrid); 
 
+        // Immediately check if the new tetromino overlaps any existing squares; if so, game over!
         if ( this.overlapsOtherSquares(this.currentTetromino, this.gameGrid) ) {
           console.log("new tetromino overlaps; game over!");
           this.gameOver = true;
         } else {
           // Otherwise if the new Tetromino DOES fit, immediately update the gameGrid
           this.gameGrid = this.updateGameGrid(this.currentTetromino.squares, this.currentTetromino.squares, this.gameGrid); 
+          console.log("Updated grid upon creation of next tetromino:");
+          this.print(this.gameGrid);
         }
 
  
@@ -274,8 +297,9 @@ export function Tetris (rows, cols) {
         }
 
 
-      }// end else: current tetromino has landed
-    }//end if lastTickTimestamp..
+      }// end if no room below
+    }//end if next move is down or lastTickTimestamp..
+
 
     console.log("gameGrid after updating:");
     this.print(this.gameGrid);
