@@ -223,8 +223,6 @@ export function Tetris (rows, cols) {
     } // end if move is not down or undefined
 
 
-
-    // if (nextMove === "hard-drop") {
     // On every X ticks / milliseconds, move the block down (regardless of user inputs)
     if (nextMove === "hard-drop" || nextMove === "soft-drop" || nextMove === undefined ||  this.lastTickTimestamp % 5 === 0) {
 
@@ -247,7 +245,12 @@ export function Tetris (rows, cols) {
         roomBelow = true;
         
         // Only run this loop once if this is not a hard drop
-        if (nextMove !== "hard-drop") { repeatLoop = false;}
+        if (nextMove !== "hard-drop") {
+          repeatLoop = false;
+        } else {
+          // A hard-drop will always end in a collision, so always trigger the next tetromino to be dropped immediately afterwards
+          roomBelow = false;
+        }
 
         // Save the new coordinates (so if loop ends after this iteration, this will be the final move)
         this.currentTetromino = updatedTetromino;
