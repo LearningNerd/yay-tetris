@@ -44,7 +44,9 @@ function p5jsInstance ( p5js) {
   const nextQueueWidth = blockSize * 4;
   const nextQueueHeight = blockSize * rows;
 
- 
+
+  // Will be updated in game loop 
+  let gameOver = false;
 
  
   // Create instance of Tetris module
@@ -64,10 +66,10 @@ function p5jsInstance ( p5js) {
     p5js.createCanvas(canvasWidth, canvasHeight);
 
     // 2 frames per second, easier for testing :)
-    p5js.frameRate(2);
+    p5js.frameRate(10);
     
     // For now, run next frame on mouse click!
-    p5js.noLoop();
+//    p5js.noLoop();
     
   }; // end p5js.setup
 
@@ -84,12 +86,28 @@ function p5jsInstance ( p5js) {
     p5js.fill("#eee");
     p5js.rect(playfieldXPos, playfieldYPos, playfieldWidth, playfieldHeight);
    
+    // Pass along the next move on each frame, if a key is being held down:
+      if (p5js.keyIsDown(p5js.LEFT_ARROW)) {
+        nextMove = "left";
+        console.log("Key pressed: left");
+      } else if (p5js.keyIsDown(p5js.RIGHT_ARROW)) {
+        nextMove = "right";
+        console.log("Key pressed: right");
+      } else if (p5js.keyIsDown(p5js.UP_ARROW)) {
+        nextMove = "rotate";
+        console.log("Key pressed: up");
+      } else {
+        nextMove = "down";
+        console.log("Key pressed: default to move down");
+      } 
+ 
+
 
     // RUN GAME LOOP ON EVERY FRAME, pass in nextMove
     // and get back an updated game state
     // Game state: sqaures array, score number, gameOver, and tetrominoQueue array
     let gameState = tetris.gameLoopTick(nextMove);
-
+    gameOver = gameState.gameOver;
 
     // Draw ALL tetromino squares on each frame
     gameState.squares.forEach( s => {
@@ -153,11 +171,12 @@ function p5jsInstance ( p5js) {
 
 
     // If the game is over, say so! (TODO: replay option)
-    if (gameState.gameOver) {
+    if (gameOver) {
       p5js.fill("red");
       p5js.textSize(50);
       p5js.textAlign("center");
       p5js.text("Game over!\n:(", canvasWidth/2, canvasHeight/2 - 50); 
+      p5js.noLoop();      
     }
 
 
@@ -167,25 +186,33 @@ function p5jsInstance ( p5js) {
 
   // Draw next frame when pressing any arrow key
   p5js.keyPressed = function() {
-    if (p5js.keyCode === p5js.LEFT_ARROW || p5js.keyCode === p5js.RIGHT_ARROW || p5js.keyCode === p5js.UP_ARROW || p5js.keyCode === p5js.DOWN_ARROW) {
+    //if (p5js.keyCode === p5js.LEFT_ARROW || p5js.keyCode === p5js.RIGHT_ARROW || p5js.keyCode === p5js.UP_ARROW || p5js.keyCode === p5js.DOWN_ARROW) {
 
-      if (p5js.keyCode === p5js.LEFT_ARROW) {
-        nextMove = "left";
-        console.log("Key pressed: left");
-      } else if (p5js.keyCode === p5js.RIGHT_ARROW) {
-        nextMove = "right";
-        console.log("Key pressed: right");
-      } else if (p5js.keyCode === p5js.UP_ARROW) {
-        nextMove = "rotate";
-        console.log("Key pressed: up");
+    if (gameOver) {
+      p5js.noLoop();      
+      return;
+    }
+
+/*
+      if (p5js.keycode === p5js.left_arrow) {
+        nextmove = "left";
+        console.log("key pressed: left");
+      } else if (p5js.keycode === p5js.right_arrow) {
+        nextmove = "right";
+        console.log("key pressed: right");
+      } else if (p5js.keycode === p5js.up_arrow) {
+        nextmove = "rotate";
+        console.log("key pressed: up");
       } else {
-        nextMove = "down";
-        console.log("Key pressed: default to move down");
+        nextmove = "down";
+        console.log("key pressed: default to move down");
       } 
  
+*/
 
-      p5js.redraw();
-    }
+
+     // p5js.redraw();
+//    }
   }; // end p5js.keyPressed
 
 
