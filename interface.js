@@ -99,9 +99,12 @@ function p5jsInstance ( p5js) {
       } else if (p5js.keyIsDown(p5js.CONTROL) || p5js.keyIsDown(90)) {
         nextMove = "rotate-counterclockwise";
         console.log("Key pressed: Ctrl or Z");
+      } else if (p5js.keyIsDown(p5js.DOWN_ARROW)) {
+        nextMove = "soft-drop";
+        console.log("Key pressed: down");
       } else {
-        nextMove = "down";
-        console.log("Key pressed: default to move down");
+        nextMove = undefined;
+        console.log("No key pressed; reset nextMove to undefined");
       } 
  
 

@@ -195,7 +195,7 @@ export function Tetris (rows, cols) {
     console.log("lastTick: " + this.lastTickTimestamp);  
  
     // Handle left/right/rotate on EVERY TICK
-    if (nextMove != "down" && nextMove != undefined) {
+    if (nextMove != "soft-drop" && nextMove != undefined) {
 
      
       console.log("gameGrid before updating:");
@@ -223,7 +223,7 @@ export function Tetris (rows, cols) {
     } // end if move is not down or undefined
 
     // On every X ticks / milliseconds, move the block down (regardless of user inputs)
-    if (this.lastTickTimestamp % 5 === 0) {
+    if (nextMove === "soft-drop" || this.lastTickTimestamp % 5 === 0) {
 
       console.log("time to move the block down!!!!!!!!!!!!!!!");
 

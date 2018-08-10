@@ -90,7 +90,6 @@ export function Tetromino (topLeftRow, topLeftCol, shape) {
 
 
   // Return new Tetromino object resulting from the next move:
-  // *** params: "down", "left", "right", "rotate"
   this.getNewTetromino = function(nextMove) {
     console.log("called getNewTetromino: " + nextMove);
 
