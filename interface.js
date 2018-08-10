@@ -4,8 +4,14 @@ import {Tetris} from "./tetris.js"
 // -- for now, this solves the issue of p5js not working when my main JS file has type="module"
 let p5js = new p5(p5jsInstance);
 
-// Prevent scrolling when holding down arrow keys
-document.addEventListener("keydown", function(event){event.preventDefault();});
+let keyCodesList = [88, 90, 32, 38, 40, 37, 39];
+
+document.addEventListener("keydown", function(event){
+  // Prevent default behavior for keys being used as game controls (except for Ctrl)
+  if (keyCodesList.includes(event.which)) {
+    event.preventDefault();
+  }
+});
 
 function p5jsInstance ( p5js) {
 
@@ -56,8 +62,8 @@ function p5jsInstance ( p5js) {
     // 2 frames per second, easier for testing :)
     p5js.frameRate(10);
     
-    // For now, run next frame on mouse click!
-    // p5js.noLoop();
+    // FOR TESTING: don't automatically draw next frames!
+    //  5js.noLoop();
     
   }; // end p5js.setup
 
@@ -104,7 +110,6 @@ function p5jsInstance ( p5js) {
         console.log("No key pressed; reset nextMove to undefined");
       } 
  
-
 
     // RUN GAME LOOP ON EVERY FRAME, pass in nextMove
     // and get back an updated game state
@@ -157,11 +162,7 @@ function p5jsInstance ( p5js) {
       let colOffset = tetromino.squares.map(s => s.col).reduce( (min, cur) => {return Math.min(min, cur)}, cols);
 [0].col;
 
-      console.log("colOffset for this tetromino: " + colOffset);
-
       tetromino.squares.forEach ( s => {
-
-        console.log("THIS SQ: col " + s.col + ", shift by offset: " + colOffset + " >> " + (s.col - colOffset) );
 
         // Draw each square based on its coordinates but relative to the queue section
         // and remove offset so the column values start at 0 (unlike in the game, where they spawn in the center column)
@@ -189,20 +190,12 @@ function p5jsInstance ( p5js) {
     }
 
 
-
   }; // end updated p5js draw()
 
-
-  // Draw next frame when pressing any arrow key
-  p5js.keyPressed = function() {
-
- //   p5js.redraw();
-  
-  }; // end p5js.keyPressed
-
-  // Prevent scrolling when holding down arrow keys
-  document.addEventListener("keydown", function(event){event.preventDefault();});
-
+  // FOR TESTING: only draw next frame on key press:
+  // p5js.keyPressed = function() {
+    // p5js.redraw();
+  // };
 
 } // end p5jsInstance
 
