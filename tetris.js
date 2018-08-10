@@ -28,9 +28,8 @@ export function Tetris (rows, cols) {
       color: "#c4b1ff", // purple
       shapeTemplate:
       [
-        [1,0],
-        [2,1],
-        [1,0]
+        [0,1,0],
+        [1,2,1]
       ]
     },
 
@@ -39,9 +38,8 @@ export function Tetris (rows, cols) {
       color: "#ffb347", // orange
       shapeTemplate:
       [
-        [1,0],
-        [2,0],
-        [1,1]
+        [0,0,1],
+        [1,2,1]
       ]
     },
  
@@ -50,9 +48,8 @@ export function Tetris (rows, cols) {
       color: "#62b1ff", // blue
       shapeTemplate:
       [
-        [0,1],
-        [0,2],
-        [1,1]
+        [1,0,0],
+        [1,2,1]
       ]
     },
      
@@ -61,9 +58,8 @@ export function Tetris (rows, cols) {
       color: "#a8e4a0", // green
       shapeTemplate: 
       [
-        [1,0],
-        [2,1],
-        [0,1]
+        [0,2,1],
+        [1,1,0]
       ]
     },
     
@@ -72,9 +68,8 @@ export function Tetris (rows, cols) {
       color: "#ff7675", // red
       shapeTemplate: 
       [
-        [0,1],
-        [1,2],
-        [1,0]
+        [1,2,0],
+        [0,1,1]
       ]
     }
   ];//end shapes
