@@ -107,7 +107,20 @@ export function Tetris (rows, cols) {
       // Assign a random shape to each new tetromino
       let randomShape = tetrominoShapes[getRandomIntInclusive(0, tetrominoShapes.length-1)];
 
-     return new Tetromino(0, 0, randomShape);
+      // Spawn location: middle or left-middle columns
+      let centerPlayfieldCol = Math.floor( this.gameGrid[0].length / 2 ) - 1; // shift to left; starts at col 0
+      let centerTetrominoCol = Math.floor( randomShape.shapeTemplate[0].length / 2);
+      
+      // If length is even, then bias the center to the left (otherwise it'll be biased to the right)
+      if (randomShape.shapeTemplate[0].length % 2 === 0) {
+        centerTetrominoCol--;
+      }
+
+      // The center col value is also the offset value from the tetromino's left col; subtract that from center of playfield
+      // to get the column that the tetromino's left corner should start in
+      let tetrominoLeftCol = centerPlayfieldCol - centerTetrominoCol;
+
+      return new Tetromino(0, tetrominoLeftCol, randomShape);
     });
 
  };//end createTetrominoQueue
