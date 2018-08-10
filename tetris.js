@@ -186,33 +186,34 @@ export function Tetris (rows, cols) {
 
     console.log("lastTick: " + this.lastTickTimestamp);  
  
-    // Default to "down" if interface didn't pass any next move 
-    if (nextMove == undefined) { nextMove = "down";}
+    // Handle left/right/rotate on EVERY TICK
+    if (nextMove != "down" && nextMove != undefined) {
 
-   
-    console.log("gameGrid before updating:");
-    this.print(this.gameGrid);
-
-    // Save copy of original coordinates
-    let prevSquares = [...this.currentTetromino.squares];
-    
-    // Get updated tetromino object with updated coordinates for potential move
-    let updatedTetromino = this.currentTetromino.getNewTetromino(nextMove);
-    console.log("updatedTetromino obj:");
-    console.log(updatedTetromino);
-    this.print(this.gameGrid);
-
-    if (!this.overlapsOtherSquares(updatedTetromino, this.gameGrid, prevSquares)) {
-
-      this.currentTetromino = updatedTetromino;
-
-      this.gameGrid = this.updateGameGrid(prevSquares, this.currentTetromino.squares, this.gameGrid); 
-
-    } 
+     
+      console.log("gameGrid before updating:");
+      this.print(this.gameGrid);
   
-    this.print(this.gameGrid);
-       
-    // TODO --- refactor this, repetitive!!!
+      // Save copy of original coordinates
+      let prevSquares = [...this.currentTetromino.squares];
+      
+      // Get updated tetromino object with updated coordinates for potential move
+      let updatedTetromino = this.currentTetromino.getNewTetromino(nextMove);
+      console.log("updatedTetromino obj:");
+      console.log(updatedTetromino);
+      this.print(this.gameGrid);
+  
+      if (!this.overlapsOtherSquares(updatedTetromino, this.gameGrid, prevSquares)) {
+  
+        this.currentTetromino = updatedTetromino;
+  
+        this.gameGrid = this.updateGameGrid(prevSquares, this.currentTetromino.squares, this.gameGrid); 
+  
+      } 
+    
+      this.print(this.gameGrid);
+
+    } // end if move is not down or undefined
+
     // On every X ticks / milliseconds, move the block down (regardless of user inputs)
     if (this.lastTickTimestamp % 5 === 0) {
 
