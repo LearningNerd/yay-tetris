@@ -190,7 +190,7 @@ export function Tetris (rows, cols) {
   this.gameLoopTick = function(nextMove) {
 
     console.log("called gameLoopTick with nextMove: " + nextMove);
-    
+
     // Update count for how often to move the tetromino down (every X milliseconds or game ticks)
     this.lastTickTimestamp++; // for now, just counting frames
 

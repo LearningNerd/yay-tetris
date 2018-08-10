@@ -1,25 +1,11 @@
 import {Tetris} from "./tetris.js"
 
-/*
-
-User Interface (p5js drawing):
-  - setup
-    -- drawing params initialized here
-    -- create game object
-
-  - draw
-    -- detect which key is pressed, call game.moveLeft/Right 
-    -- run gameLoopTick, get array of  squares output. convert row/col/color to drawing rectangles at the proper coordinates 
- 
-  - keypressed
-    -- for now: draw next frame
-
-*/
-
-
 // Set up p5js to run in instance mode
 // -- for now, this solves the issue of p5js not working when my main JS file has type="module"
 let p5js = new p5(p5jsInstance);
+
+// Prevent scrolling when holding down arrow keys
+document.addEventListener("keydown", function(event){event.preventDefault();});
 
 function p5jsInstance ( p5js) {
 
@@ -28,22 +14,24 @@ function p5jsInstance ( p5js) {
   const blockSize = 25;
 
   const topMargin = 5;
+  const leftMargin = 15;
+  const rightMargin = 10;
 
-  const playfieldXPos = 75;
-  const playfieldYPos = topMargin;;
+  const playfieldXPos = leftMargin;
+  const playfieldYPos = topMargin;
 
   const playfieldWidth = blockSize * cols;
   const playfieldHeight = blockSize * rows;
-  
-  const canvasWidth = playfieldWidth * 3;
-  const canvasHeight = playfieldHeight + 75;
 
-  const nextQueueXPos = playfieldXPos + playfieldWidth + 0.65*playfieldWidth;
+  const nextQueueLeftMargin = 0.2 * playfieldWidth; 
+  const nextQueueXPos = playfieldXPos + playfieldWidth + nextQueueLeftMargin;
   const nextQueueYPos = topMargin + 50;
 
   const nextQueueWidth = blockSize * 4;
   const nextQueueHeight = blockSize * rows;
 
+  const canvasWidth = leftMargin + rightMargin + playfieldWidth + nextQueueWidth + nextQueueLeftMargin;
+  const canvasHeight = playfieldHeight + 75;
 
   // Will be updated in game loop 
   let gameOver = false;
@@ -143,11 +131,9 @@ function p5jsInstance ( p5js) {
     p5js.text("Score: " + gameState.score, canvasWidth/2, canvasHeight - 5);
 
 
-
-
     // Draw background for queue of next tetrominoes
-    //    p5js.fill("#eee");
-    //    p5js.rect(nextQueueXPos, nextQueueYPos, nextQueueWidth, nextQueueHeight);
+    // p5js.fill("#eee");
+    // p5js.rect(nextQueueXPos, nextQueueYPos, nextQueueWidth, nextQueueHeight);
 
     // Draw "Next" title:
     p5js.fill(0);
@@ -166,11 +152,20 @@ function p5jsInstance ( p5js) {
 
       let xPos;
       let yPos;
- 
+
+      // Get the lowest (left-most) column value; use that to remove the offset, shift back to column 0
+      let colOffset = tetromino.squares.map(s => s.col).reduce( (min, cur) => {return Math.min(min, cur)}, cols);
+[0].col;
+
+      console.log("colOffset for this tetromino: " + colOffset);
+
       tetromino.squares.forEach ( s => {
 
+        console.log("THIS SQ: col " + s.col + ", shift by offset: " + colOffset + " >> " + (s.col - colOffset) );
+
         // Draw each square based on its coordinates but relative to the queue section
-        xPos = nextXStart + s.col * blockSize;
+        // and remove offset so the column values start at 0 (unlike in the game, where they spawn in the center column)
+        xPos = nextXStart + (s.col - colOffset) * blockSize;
         yPos = nextYStart + s.row * blockSize;
    
         p5js.fill(s.color); 
@@ -182,7 +177,6 @@ function p5jsInstance ( p5js) {
       nextYStart = yPos + blockSize * 2;
 
     });
-
 
 
     // If the game is over, say so! (TODO: replay option)
