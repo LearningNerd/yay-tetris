@@ -223,8 +223,8 @@ export function Tetris (rows, cols) {
     } // end if move is not down or undefined
 
 
-    // On every X ticks / milliseconds, move the block down (regardless of user inputs)
-    if (nextMove === "hard-drop" || nextMove === "soft-drop" || nextMove === undefined ||  this.lastTickTimestamp % 5 === 0) {
+    // Move block down on this frame if hard drop, soft drop, or every X ticks
+    if (nextMove === "hard-drop" || nextMove === "soft-drop" || this.lastTickTimestamp % 5 === 0) {
 
       console.log("Time to move the block down!!! Next move: " + nextMove);
 
