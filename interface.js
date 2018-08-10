@@ -69,7 +69,7 @@ function p5jsInstance ( p5js) {
     p5js.frameRate(10);
     
     // For now, run next frame on mouse click!
-//    p5js.noLoop();
+    p5js.noLoop();
     
   }; // end p5js.setup
 
@@ -93,9 +93,12 @@ function p5jsInstance ( p5js) {
       } else if (p5js.keyIsDown(p5js.RIGHT_ARROW)) {
         nextMove = "right";
         console.log("Key pressed: right");
-      } else if (p5js.keyIsDown(p5js.UP_ARROW)) {
-        nextMove = "rotate";
-        console.log("Key pressed: up");
+      } else if (p5js.keyIsDown(p5js.UP_ARROW) || p5js.keyIsDown(88)) {
+        nextMove = "rotate-clockwise";
+        console.log("Key pressed: up or X");
+      } else if (p5js.keyIsDown(p5js.CONTROL) || p5js.keyIsDown(90)) {
+        nextMove = "rotate-counterclockwise";
+        console.log("Key pressed: Ctrl or Z");
       } else {
         nextMove = "down";
         console.log("Key pressed: default to move down");
@@ -187,6 +190,8 @@ function p5jsInstance ( p5js) {
   // Draw next frame when pressing any arrow key
   p5js.keyPressed = function() {
     //if (p5js.keyCode === p5js.LEFT_ARROW || p5js.keyCode === p5js.RIGHT_ARROW || p5js.keyCode === p5js.UP_ARROW || p5js.keyCode === p5js.DOWN_ARROW) {
+
+    p5js.redraw();
 
     if (gameOver) {
       p5js.noLoop();      

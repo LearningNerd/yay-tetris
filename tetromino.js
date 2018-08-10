@@ -51,11 +51,11 @@ export function Tetromino (topLeftRow, topLeftCol, shape) {
   
 
   
-  // Rotate clockwise (for now) -- update shape, no output
-  this.rotate = function(clockwise) {
-    // For now, just clockwise ... later could use this param as a boolean to indicate direction
+  // Rotate -- return copy of the shape after rotation
+  // direction is 1 for clockwise, -1 for counter
+  this.rotate = function(direction) {
 
-    console.log("called rotate");
+    console.log("called rotate, direction: " + direction);
 
     // If no center of rotation (for the "O" shape), just return a copy of this tetromino as-is:
     if ( this.centerSquare == undefined) {
@@ -73,8 +73,8 @@ export function Tetromino (topLeftRow, topLeftCol, shape) {
       // console.log("cur square: " + curSquare.row + ", " + curSquare.col);
       // console.log("offset from center: " + origRowOffset + ", " + origColOffset);
 
-      let newRow = this.centerSquare.row + origColOffset;
-      let newCol = this.centerSquare.col - origRowOffset;
+      let newRow = this.centerSquare.row + direction * origColOffset;
+      let newCol = this.centerSquare.col + direction * -1 * origRowOffset;
 
       // console.log("rotate: (" + curSquare.row + "," + curSquare.col + ") >> (" + newRow + "," + newCol + ")");
 
@@ -104,9 +104,10 @@ export function Tetromino (topLeftRow, topLeftCol, shape) {
     } else if (nextMove === "right") {
       rowOffset = 0;
       colOffset = 1;
-    } else if (nextMove === "rotate") {
-      // Return new copy of Tetromino that results from rotation
-      return this.rotate();
+    } else if (nextMove === "rotate-clockwise") {
+      return this.rotate(1);
+    } else if (nextMove === "rotate-counterclockwise") {
+      return this.rotate(-1);
     }
 
     // If NOT rotating, update coordinates based on offset:
