@@ -75,12 +75,16 @@ export function Tetris (rows, cols) {
   ];//end shapes
 
   // Number of ticks/moves allowed before moving tetromino down / potentially locking it
-  const ticksUntilLock = 15;
+  const ticksUntilLock = 60;
+  // Number of ticks in between repeated left/right movement
+  const translationTickInterval = 2;
 
   this.fallenSquares = [];
   this.lastTickTimestamp = 0; // for now, number of frames
+  this.ticks = 0;
   this.score = 0;
   this.gameOver = false;
+  this.prevMove;
   
   // Generate 2D array based on rows / cols, each element populated with 0s
   this.gameGrid = new Array(rows).fill(null).map(row => new Array(cols).fill(0));
@@ -192,26 +196,37 @@ export function Tetris (rows, cols) {
 
     console.log("called gameLoopTick with nextMove: " + nextMove);
 
-    // Update count for how often to move the tetromino down (every X milliseconds or game ticks)
-    this.lastTickTimestamp++; // for now, just counting frames
-
     console.log("lastTick: " + this.lastTickTimestamp);  
- 
-    // Handle left/right/rotate on EVERY TICK
-    if (nextMove !== "hard-drop" && nextMove !== "soft-drop" && nextMove != undefined) {
+    console.log("ticks: " + this.ticks);
+    console.log("ticks since lastTickTImestamp: " + (this.ticks - this.lastTickTimestamp));
 
-     
-      console.log("gameGrid before updating:");
-      this.print(this.gameGrid);
+    console.log(">= interval?: " + (this.ticks - this.lastTickTimestamp >= translationTickInterval) );
+
+
+    // ON EVERY TICK:
+    //  - If rotating, do the move (potentially on every tick, but doesn't auto-repeat)
+    //  - If left/right and NOT repeated, do the move
+    //  - If left/right and repeated, ONLY do the move every X ticks
+    if ( nextMove === "rotate-clockwise" || nextMove === "rotate-counterclockwise" ||
+          ( (nextMove === "left" || nextMove === "right") && nextMove !== this.prevMove ) ||
+          ( (nextMove === "left" || nextMove === "right")
+            && this.ticks - this.lastTickTimestamp >= translationTickInterval)
+      ) {
+
+      // Keep track of the last tick that did a move
+      this.lastTickTimestamp = this.ticks;
+
+//      console.log("gameGrid before updating:");
+//      this.print(this.gameGrid);
   
       // Save copy of original coordinates
       let prevSquares = [...this.currentTetromino.squares];
       
       // Get updated tetromino object with updated coordinates for potential move
       let updatedTetromino = this.currentTetromino.getNewTetromino(nextMove);
-      console.log("updatedTetromino obj:");
-      console.log(updatedTetromino);
-      this.print(this.gameGrid);
+//      console.log("updatedTetromino obj:");
+//      console.log(updatedTetromino);
+//     this.print(this.gameGrid);
   
       if (!this.overlapsOtherSquares(updatedTetromino, this.gameGrid, prevSquares)) {
   
@@ -221,13 +236,13 @@ export function Tetris (rows, cols) {
   
       } 
     
-      this.print(this.gameGrid);
+      // this.print(this.gameGrid);
 
-    } // end if move is not down or undefined
+    } // end if move is rotation, left/right (with slowed auto-repeat)
 
 
     // Move block down on this frame if hard drop, soft drop, or every X ticks
-    if (nextMove === "hard-drop" || nextMove === "soft-drop" || this.lastTickTimestamp % ticksUntilLock === 0) {
+    if (nextMove === "hard-drop" || nextMove === "soft-drop" || this.ticks % ticksUntilLock === 0) {
 
       console.log("Time to move the block down!!! Next move: " + nextMove);
 
@@ -260,8 +275,8 @@ export function Tetris (rows, cols) {
       
         // Get updated tetromino object with updated coordinates for potential move
         updatedTetromino = updatedTetromino.getNewTetromino("down");
-        console.log("updatedTetromino obj:");
-        console.log(updatedTetromino);
+        // console.log("updatedTetromino obj:");
+        //console.log(updatedTetromino);
       }
       // Once a collision has been detected, update the game grid to reflect the update
       // (or if no move is possible at all, 
@@ -274,8 +289,8 @@ export function Tetris (rows, cols) {
         // Drop the next tetromino
         this.currentTetromino = this.incrementTetromino();
    
-        console.log(this.currentTetromino);
-        this.print(this.gameGrid); 
+        //console.log(this.currentTetromino);
+        //this.print(this.gameGrid); 
 
         // Immediately check if the new tetromino overlaps any existing squares; if so, game over!
         if ( this.overlapsOtherSquares(this.currentTetromino, this.gameGrid) ) {
@@ -307,9 +322,16 @@ export function Tetris (rows, cols) {
     }//end if next move is down or lastTickTimestamp..
 
 
-    console.log("gameGrid after updating:");
-    this.print(this.gameGrid);
+//    console.log("gameGrid after updating:");
+//    this.print(this.gameGrid);
 
+    // Update prevMove for next tick
+    this.prevMove = nextMove;
+ 
+    // Update count for how often to move the tetromino down (every X milliseconds or game ticks)
+    this.ticks++;
+
+   
     // Return for game state: squares array (previous and current), score number, and gameOver boolean
     return {
             score: this.score,
