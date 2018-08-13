@@ -69,10 +69,10 @@ function p5jsInstance ( p5js) {
     p5js.createCanvas(canvasWidth, canvasHeight);
 
     // 2 frames per second, easier for testing :)
-    p5js.frameRate(10);
+    p5js.frameRate(1);
     
     // FOR TESTING: don't automatically draw next frames!
-    //  5js.noLoop();
+    //  p5js.noLoop();
     
   }; // end p5js.setup
 
