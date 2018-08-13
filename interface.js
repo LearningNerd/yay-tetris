@@ -88,30 +88,7 @@ function p5jsInstance ( p5js) {
     // Draw the Tetris playfield
     p5js.fill("#eee");
     p5js.rect(playfieldXPos, playfieldYPos, playfieldWidth, playfieldHeight);
-   
-    // Pass along the next move on each frame, if a key is being held down:
-      if (p5js.keyIsDown(p5js.LEFT_ARROW)) {
-        nextMove = "left";
-        console.log("Key pressed: left");
-
-      } else if (p5js.keyIsDown(p5js.RIGHT_ARROW)) {
-        nextMove = "right";
-        console.log("Key pressed: right");
-
-      } else if (p5js.keyIsDown(p5js.UP_ARROW) || p5js.keyIsDown(88)) {
-        nextMove = "rotate-clockwise";
-        console.log("Key pressed: up or X");
-
-      } else if (p5js.keyIsDown(p5js.CONTROL) || p5js.keyIsDown(90)) {
-        nextMove = "rotate-counterclockwise";
-        console.log("Key pressed: Ctrl or Z");
-
-      } else if (p5js.keyIsDown(p5js.DOWN_ARROW)) {
-        nextMove = "soft-drop";
-        console.log("Key pressed: down");
-      }
-*/
-
+  
     // Run game loop every X milliseconds (loopIntervalMillis) -- or initiate
     if (p5js.millis() - previousTimestamp >= loopIntervalMillis || p5js.millis() < loopIntervalMillis) {
       previousTimestamp = p5js.millis();
@@ -204,6 +181,31 @@ function p5jsInstance ( p5js) {
 
 
   }; // end updated p5js draw()
+
+
+  p5js.keyPressed = function() {
+    if (p5js.keyCode === 32) {
+      nextMove = "hard-drop";
+      console.log("Key pressed: space");
+    } else if (p5js.keyCode === p5js.UP_ARROW || p5js.keyCode === 88) {
+      nextMove = "rotate-clockwise";
+      console.log("Key pressed: up or X");
+    } else if (p5js.keyCode === p5js.CONTROL || p5js.keyCode === 90) {
+      nextMove = "rotate-counterclockwise";
+      console.log("Key pressed: Ctrl or Z");
+    } else if (p5js.keyCode === p5js.LEFT_ARROW) {
+      nextMove = "left";
+      console.log("Key pressed: left");
+    } else if (p5js.keyCode === p5js.RIGHT_ARROW) {
+      nextMove = "right";
+      console.log("Key pressed: right");
+    } else if (p5js.keyCode === p5js.DOWN_ARROW) {
+      nextMove = "soft-drop";
+      console.log("Key pressed: down");
+    }
+
+  };
+
 
   // FOR TESTING: only draw next frame on key press:
   // p5js.keyPressed = function() {
