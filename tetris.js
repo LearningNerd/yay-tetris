@@ -74,7 +74,8 @@ export function Tetris (rows, cols) {
     }
   ];//end shapes
 
-
+  // Number of ticks/moves allowed before moving tetromino down / potentially locking it
+  const ticksUntilLock = 15;
 
   this.fallenSquares = [];
   this.lastTickTimestamp = 0; // for now, number of frames
@@ -226,7 +227,7 @@ export function Tetris (rows, cols) {
 
 
     // Move block down on this frame if hard drop, soft drop, or every X ticks
-    if (nextMove === "hard-drop" || nextMove === "soft-drop" || this.lastTickTimestamp % 5 === 0) {
+    if (nextMove === "hard-drop" || nextMove === "soft-drop" || this.lastTickTimestamp % ticksUntilLock === 0) {
 
       console.log("Time to move the block down!!! Next move: " + nextMove);
 
