@@ -19,6 +19,9 @@ function p5jsInstance ( p5js) {
   const rows = 20, cols = 10;
   const blockSize = 25;
 
+  // Game loop speed (tick every X milliseconds)
+  const loopIntervalMillis = 60;
+
   const topMargin = 5;
   const leftMargin = 15;
   const rightMargin = 10;
@@ -42,12 +45,18 @@ function p5jsInstance ( p5js) {
   // Will be updated in game loop 
   let gameOver = false;
 
+  // To track how many millis have elapsed since previous game loop tick
+  let previousTimestamp = 0;
  
   // Create instance of Tetris module
   let tetris = new Tetris(rows, cols);
 
   // Will update this on key press, pass to gameLoopTick
   let nextMove;
+
+  // Update on every game loop tick
+  let gameState;
+
 
   // Runs once to set up the canvas element and p5js animation stuff
   p5js.setup = function() {
@@ -100,22 +109,26 @@ function p5jsInstance ( p5js) {
       } else if (p5js.keyIsDown(p5js.DOWN_ARROW)) {
         nextMove = "soft-drop";
         console.log("Key pressed: down");
+      }
+*/
 
-      } else if (p5js.keyIsDown(32)) {
-        nextMove = "hard-drop";
-        console.log("Key pressed: space");
+    // Run game loop every X milliseconds (loopIntervalMillis) -- or initiate
+    if (p5js.millis() - previousTimestamp >= loopIntervalMillis || p5js.millis() < loopIntervalMillis) {
+      previousTimestamp = p5js.millis();
+      // Game state: sqaures array, score number, gameOver, and tetrominoQueue array
+      gameState = tetris.gameLoopTick(nextMove);
+      gameOver = gameState.gameOver;
 
-      } else {
+      // If not holding down left or right keys, then reset move on every tick
+      if (!p5js.keyIsDown(p5js.LEFT_ARROW) && !p5js.keyIsDown(p5js.RIGHT_ARROW) && !p5js.keyIsDown(p5js.DOWN_ARROW)) {
+        // Reset nextMove after every game loop tick (only repeat moves based on keypress)
         nextMove = undefined;
-        console.log("No key pressed; reset nextMove to undefined");
-      } 
- 
+      }
+    }
 
-    // RUN GAME LOOP ON EVERY FRAME, pass in nextMove
-    // and get back an updated game state
-    // Game state: sqaures array, score number, gameOver, and tetrominoQueue array
-    let gameState = tetris.gameLoopTick(nextMove);
-    gameOver = gameState.gameOver;
+    console.log(p5js.millis());
+    console.log(p5js.millis() - previousTimestamp);
+
 
     // Draw ALL tetromino squares on each frame
     gameState.squares.forEach( s => {
