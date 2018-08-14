@@ -54,7 +54,8 @@ function p5jsInstance ( p5js) {
 
   // Will update this on key press, pass to gameLoopTick
   let nextMove;
-
+  let lastKeyDown;
+  
   // Update on every game loop tick
   let gameState;
 
@@ -112,9 +113,9 @@ function p5jsInstance ( p5js) {
           nextMove = "left-soft-drop";
         } else if (p5js.keyIsDown(p5js.DOWN_ARROW) && p5js.keyIsDown(p5js.RIGHT_ARROW) ) {
           nextMove = "right-soft-drop";
-        } else if (p5js.keyIsDown(p5js.LEFT_ARROW)) {
+        } else if (p5js.keyIsDown(p5js.LEFT_ARROW) && lastKeyDown === "left") {
           nextMove = "left";
-        } else if (p5js.keyIsDown(p5js.RIGHT_ARROW)) {
+        } else if (p5js.keyIsDown(p5js.RIGHT_ARROW) && lastKeyDown === "right") {
           nextMove = "right";
         } 
 
@@ -225,13 +226,14 @@ function p5jsInstance ( p5js) {
     } else if (p5js.keyCode === p5js.LEFT_ARROW) {
       nextMove = "left";
       //console.log("Key pressed: left");
-
+      lastKeyDown = "left";
       keyDownTimestamp = p5js.millis();
 
     } else if (p5js.keyCode === p5js.RIGHT_ARROW) {
       nextMove = "right";
       //console.log("Key pressed: right");
       
+      lastKeyDown = "right";
       keyDownTimestamp = p5js.millis();
 
     } else if (p5js.keyCode === p5js.DOWN_ARROW) {
