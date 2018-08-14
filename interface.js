@@ -64,7 +64,7 @@ function p5jsInstance ( p5js) {
   // Runs once to set up the canvas element and p5js animation stuff
   p5js.setup = function() {
 
-    console.log("Called p5js setup()");
+    //console.log("Called p5js setup()");
     
     // Fix for retina displays (bug: clear() only clears top left corner of canvas)
     p5js.pixelDensity(1);
@@ -82,19 +82,24 @@ function p5jsInstance ( p5js) {
 
   // FOR TESTING UPDATE WITH REAL TETROMINOES:
   p5js.draw = function() {
-    // console.log("called draw()");
+    //30console.log("called draw()");
 
     // Clear the canvas on each frame
     p5js.clear();    
 
-
     // Draw the Tetris playfield
     p5js.fill("#eee");
     p5js.rect(playfieldXPos, playfieldYPos, playfieldWidth, playfieldHeight);
-  
+ 
+
+    // console.log("DRAW nextmove: " + nextMove);
+    
+ 
     // Run game loop every X milliseconds (loopIntervalMillis) -- or initiate
     if (p5js.millis() - previousTimestamp >= loopIntervalMillis || p5js.millis() < loopIntervalMillis) {
       previousTimestamp = p5js.millis();
+
+
       // Game state: sqaures array, score number, gameOver, and tetrominoQueue array
       gameState = tetris.gameLoopTick(nextMove);
       gameOver = gameState.gameOver;
@@ -203,38 +208,38 @@ function p5jsInstance ( p5js) {
   p5js.keyPressed = function() {
     if (p5js.keyCode === 32) {
       nextMove = "hard-drop";
-      console.log("Key pressed: space");
+      //console.log("Key pressed: space");
     
     } else if (p5js.keyCode === p5js.UP_ARROW || p5js.keyCode === 88) {
       nextMove = "rotate-clockwise";
-      console.log("Key pressed: up or X");
+      //console.log("Key pressed: up or X");
     
     } else if (p5js.keyCode === p5js.CONTROL || p5js.keyCode === 90) {
       nextMove = "rotate-counterclockwise";
-      console.log("Key pressed: Ctrl or Z");
+      //console.log("Key pressed: Ctrl or Z");
     
     } else if (p5js.keyCode === p5js.LEFT_ARROW) {
       nextMove = "left";
-      console.log("Key pressed: left");
+      //console.log("Key pressed: left");
 
       keyDownTimestamp = p5js.millis();
 
     } else if (p5js.keyCode === p5js.RIGHT_ARROW) {
       nextMove = "right";
-      console.log("Key pressed: right");
+      //console.log("Key pressed: right");
       
       keyDownTimestamp = p5js.millis();
 
     } else if (p5js.keyCode === p5js.DOWN_ARROW) {
       nextMove = "soft-drop";
-      console.log("Key pressed: down");
+      //console.log("Key pressed: down");
       
       keyDownTimestamp = p5js.millis();
     }
 
-    console.log("keydowntime: " + keyDownTimestamp);
+    //console.log("keydowntime: " + keyDownTimestamp);
 
-    console.log("KEYPRESSED nextmove: " + nextMove);
+    //console.log("KEYPRESSED nextmove: " + nextMove);
 
   };
 

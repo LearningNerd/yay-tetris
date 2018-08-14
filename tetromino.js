@@ -12,7 +12,7 @@ Tetromino:
 
 export function Tetromino (topLeftRow, topLeftCol, shape) {
 
-  console.log("****** TETROMINO CONSTRUCTOR CALLED *********");
+  //console.log("****** TETROMINO CONSTRUCTOR CALLED *********");
 
   this.color = shape.color;
   this.shapeName = shape.shapeName;
@@ -55,11 +55,11 @@ export function Tetromino (topLeftRow, topLeftCol, shape) {
   // direction is 1 for clockwise, -1 for counter
   this.rotate = function(direction) {
 
-    console.log("called rotate, direction: " + direction);
+    //console.log("called rotate, direction: " + direction);
 
     // If no center of rotation (for the "O" shape), just return a copy of this tetromino as-is:
     if ( this.centerSquare == undefined) {
-      console.log("No center of rotation. Returning this tetromino as-is.");
+      //console.log("No center of rotation. Returning this tetromino as-is.");
       return {...this};
     }
 
@@ -91,7 +91,7 @@ export function Tetromino (topLeftRow, topLeftCol, shape) {
 
   // Return new Tetromino object resulting from the next move:
   this.getNewTetromino = function(nextMove) {
-    console.log("called getNewTetromino: " + nextMove);
+    //console.log("called getNewTetromino: " + nextMove);
 
     // Set offset values based on nextMove
     let rowOffset = 1; // default for down

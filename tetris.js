@@ -75,7 +75,7 @@ export function Tetris (rows, cols) {
   ];//end shapes
 
   // Number of ticks/moves allowed before moving tetromino down / potentially locking it
-  const ticksUntilLock = 15;
+  const ticksUntilLock = 10;
 
   this.fallenSquares = [];
   this.lastTickTimestamp = 0; // for now, number of frames
@@ -85,7 +85,7 @@ export function Tetris (rows, cols) {
   // Generate 2D array based on rows / cols, each element populated with 0s
   this.gameGrid = new Array(rows).fill(null).map(row => new Array(cols).fill(0));
   
-  console.log("****** GRID CREATED *********");
+  //console.log("****** GRID CREATED *********");
 
  
   // To see the grid in console:
@@ -94,7 +94,7 @@ export function Tetris (rows, cols) {
     let stringGrid = grid.reduce( (str, row) => {
       return str += row.join(" ") + "\n";
     }, "\n");
-    console.log(stringGrid);
+    //console.log(stringGrid);
   };
 
 
@@ -124,7 +124,7 @@ export function Tetris (rows, cols) {
   // Generate an array of the next randomized tetrominoes
   this.createTetrominoQueue = function (numberOfTetrominoes) {
 
-    console.log("called createTetrominoQueue");
+    //console.log("called createTetrominoQueue");
 
     return new Array(numberOfTetrominoes).fill(null).map(tetromino => {
       return this.createTetromino();
@@ -137,7 +137,7 @@ export function Tetris (rows, cols) {
   // Push new tetrominoes to the queue. Note: updates in place
   this.addToTetrominoQueue = function (numberOfTetrominoes) {
 
-    console.log("called addToTetrominoQueue");
+    //console.log("called addToTetrominoQueue");
 
     let tetrominoesToPush = new Array(numberOfTetrominoes).fill(null).map(tetromino => {
       return this.createTetromino();
@@ -154,14 +154,14 @@ export function Tetris (rows, cols) {
   // Note: updates multiple things in place!
   this.incrementTetromino = function () {
     
-    console.log("called incrementTetromino");
+    //console.log("called incrementTetromino");
 
     // Save current tetromino's squares (if currentTetromino was already initialized
     if (this.currentTetromino) {
       this.fallenSquares = [...this.fallenSquares, ...this.currentTetromino.squares];
 
-      console.log("new fallenSquares:");
-      console.log([...this.fallenSquares]);
+      //console.log("new fallenSquares:");
+      //console.log([...this.fallenSquares]);
     }
   
     // Add another tetromino to the queue each time
@@ -177,31 +177,31 @@ export function Tetris (rows, cols) {
   // Initialize queue
   this.tetrominoQueue = this.createTetrominoQueue(4);
 
-  console.log([...this.tetrominoQueue]);
+  //console.log([...this.tetrominoQueue]);
 
   // Initialize current tetromino (and queue will now contain 1 less!)
   this.currentTetromino = this.incrementTetromino();
 
 
-  console.log("**** INITIALIZED FIRST TETROMINO ****");
-  console.log([...this.currentTetromino.squares]);
-  console.log({...this.currentTetromino});
+  //console.log("**** INITIALIZED FIRST TETROMINO ****");
+  //console.log([...this.currentTetromino.squares]);
+  //console.log({...this.currentTetromino});
  
  
   this.gameLoopTick = function(nextMove) {
 
-    console.log("called gameLoopTick with nextMove: " + nextMove);
+    //console.log("called gameLoopTick with nextMove: " + nextMove);
 
     // Update count for how often to move the tetromino down (every X milliseconds or game ticks)
     this.lastTickTimestamp++; // for now, just counting frames
 
-    console.log("lastTick: " + this.lastTickTimestamp);  
+    //console.log("lastTick: " + this.lastTickTimestamp);  
  
     // Handle left/right/rotate on EVERY TICK
     if (nextMove !== "hard-drop" && nextMove !== "soft-drop" && nextMove != undefined) {
 
      
-      console.log("gameGrid before updating:");
+      //console.log("gameGrid before updating:");
       this.print(this.gameGrid);
   
       // Save copy of original coordinates
@@ -209,8 +209,8 @@ export function Tetris (rows, cols) {
       
       // Get updated tetromino object with updated coordinates for potential move
       let updatedTetromino = this.currentTetromino.getNewTetromino(nextMove);
-      console.log("updatedTetromino obj:");
-      console.log(updatedTetromino);
+      //console.log("updatedTetromino obj:");
+      //console.log(updatedTetromino);
       this.print(this.gameGrid);
   
       if (!this.overlapsOtherSquares(updatedTetromino, this.gameGrid, prevSquares)) {
@@ -229,7 +229,7 @@ export function Tetris (rows, cols) {
     // Move block down on this frame if hard drop, soft drop, or every X ticks
     if (nextMove === "hard-drop" || nextMove === "soft-drop" || this.lastTickTimestamp % ticksUntilLock === 0) {
 
-      console.log("Time to move the block down!!! Next move: " + nextMove);
+      //console.log("Time to move the block down!!! Next move: " + nextMove);
 
       // Save copy of original coordinates
       let prevSquares = [...this.currentTetromino.squares];
@@ -260,8 +260,8 @@ export function Tetris (rows, cols) {
       
         // Get updated tetromino object with updated coordinates for potential move
         updatedTetromino = updatedTetromino.getNewTetromino("down");
-        console.log("updatedTetromino obj:");
-        console.log(updatedTetromino);
+        //console.log("updatedTetromino obj:");
+        //console.log(updatedTetromino);
       }
       // Once a collision has been detected, update the game grid to reflect the update
       // (or if no move is possible at all, 
@@ -274,17 +274,17 @@ export function Tetris (rows, cols) {
         // Drop the next tetromino
         this.currentTetromino = this.incrementTetromino();
    
-        console.log(this.currentTetromino);
+        //console.log(this.currentTetromino);
         this.print(this.gameGrid); 
 
         // Immediately check if the new tetromino overlaps any existing squares; if so, game over!
         if ( this.overlapsOtherSquares(this.currentTetromino, this.gameGrid) ) {
-          console.log("new tetromino overlaps; game over!");
+          //console.log("new tetromino overlaps; game over!");
           this.gameOver = true;
         } else {
           // Otherwise if the new Tetromino DOES fit, immediately update the gameGrid
           this.gameGrid = this.updateGameGrid(this.currentTetromino.squares, this.currentTetromino.squares, this.gameGrid); 
-          console.log("Updated grid upon creation of next tetromino:");
+          //console.log("Updated grid upon creation of next tetromino:");
           this.print(this.gameGrid);
         }
 
@@ -307,7 +307,7 @@ export function Tetris (rows, cols) {
     }//end if next move is down or lastTickTimestamp..
 
 
-    console.log("gameGrid after updating:");
+    //console.log("gameGrid after updating:");
     this.print(this.gameGrid);
 
     // Return for game state: squares array (previous and current), score number, and gameOver boolean
@@ -339,13 +339,13 @@ export function Tetris (rows, cols) {
      for (let square of currentTetromino.squares) {
       
       if (!gameGrid[square.row] || ( gameGrid[square.row][square.col] !== 0 && !prevCoords.includes(square.row+"-"+square.col) )  ) {
-        console.log("square at " + square.row + ", " + square.col + "has a collision!!!");
+        //console.log("square at " + square.row + ", " + square.col + "has a collision!!!");
         return true;
       }
     }
 
     // Otherwise if all squares are on the screen, return false
-    console.log("All squares fit on screen");
+    //console.log("All squares fit on screen");
     return false;
 
   };
@@ -355,12 +355,12 @@ export function Tetris (rows, cols) {
   // TODO: update based on completed rows too, if any
   // TODO: pass in nextMove param ???
   this.updateGameGrid = function(prevSquares, newSquares, gameGrid) {
-    console.log("called updateGameGrid");
+    //console.log("called updateGameGrid");
 
-    console.log("prev quesres:");
-    console.log(prevSquares);
-    console.log("new sq:");
-    console.log(newSquares);
+    //console.log("prev quesres:");
+    //console.log(prevSquares);
+    //console.log("new sq:");
+    //console.log(newSquares);
 
     // Modify a copy of previous gameGrid, return new array instead of mutating
     let newGameGrid = [...gameGrid];
@@ -387,7 +387,7 @@ export function Tetris (rows, cols) {
   // PURE FUNCTION -- given a gameGrid, return array of row indexes that have been completed
   this.getCompletedRows = function (gameGrid) {
   
-    console.log("called getCompletedRows");
+    //console.log("called getCompletedRows");
   
     return gameGrid.map ( (row, index) => {
       let rowSum = row.reduce( (square,sum) => sum + square);
@@ -403,13 +403,13 @@ export function Tetris (rows, cols) {
   // Remove and shift down squares as needed after rows have been completed
   this.clearAndUpdateSquares = function (completedRows, fallenSquares) {
   
-    console.log("called clearAndUpdateSquares");
+    //console.log("called clearAndUpdateSquares");
   
     // Filter fallenSquares array to remove any that belonged to any of completedRows,
     let remainingSquares = fallenSquares.filter(square => completedRows.indexOf(square.row) === -1 );
   
-    console.log("After filtering clear rows:");
-    console.log(remainingSquares); 
+    //console.log("After filtering clear rows:");
+    //console.log(remainingSquares); 
 
 
     // Shift each remaining square's row down X times, where X is the number of cleared rows below it
@@ -421,8 +421,8 @@ export function Tetris (rows, cols) {
     });
 
 
-    console.log("after moving squares down:");
-    console.log(updatedFallenSquares);
+    //console.log("after moving squares down:");
+    //console.log(updatedFallenSquares);
 
     return updatedFallenSquares;
  
