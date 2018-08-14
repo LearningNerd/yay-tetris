@@ -19,8 +19,9 @@ function p5jsInstance ( p5js) {
   const rows = 20, cols = 10;
   const blockSize = 25;
 
-  // Game loop speed (tick every X milliseconds)
-  const loopIntervalMillis = 60;
+  const frameRate = 60; // frames per second
+  const loopIntervalMillis = 50; // Game loop speed (tick every X milliseconds)
+  const keyRepeatDelay = 120; // milliseconds until key auto-repeats for left/right/soft-drop
 
   const topMargin = 5;
   const leftMargin = 15;
@@ -57,6 +58,8 @@ function p5jsInstance ( p5js) {
   // Update on every game loop tick
   let gameState;
 
+  // Track when a key was initially pressed down (used for repeating moves after a delay)
+  let keyDownTimestamp = 0;
 
   // Runs once to set up the canvas element and p5js animation stuff
   p5js.setup = function() {
@@ -69,7 +72,7 @@ function p5jsInstance ( p5js) {
     p5js.createCanvas(canvasWidth, canvasHeight);
 
     // 2 frames per second, easier for testing :)
-    p5js.frameRate(1);
+    p5js.frameRate(frameRate);
     
     // FOR TESTING: don't automatically draw next frames!
     //  p5js.noLoop();
@@ -96,15 +99,29 @@ function p5jsInstance ( p5js) {
       gameState = tetris.gameLoopTick(nextMove);
       gameOver = gameState.gameOver;
 
-      // If not holding down left or right keys, then reset move on every tick
-      if (!p5js.keyIsDown(p5js.LEFT_ARROW) && !p5js.keyIsDown(p5js.RIGHT_ARROW) && !p5js.keyIsDown(p5js.DOWN_ARROW)) {
-        // Reset nextMove after every game loop tick (only repeat moves based on keypress)
+      // Soft-drop is the only move that repeats immediately on keydown
+      if (p5js.keyIsDown(p5js.DOWN_ARROW)) {
+        nextMove = "soft-drop";
+
+      // For left/right, repeat on keydown but only after a delay
+      } else if (p5js.millis() - keyDownTimestamp >= keyRepeatDelay && (p5js.keyIsDown(p5js.LEFT_ARROW) || p5js.keyIsDown(p5js.RIGHT_ARROW)) ) {
+        
+        // Set left/right as nextMove
+        if (p5js.keyIsDown(p5js.LEFT_ARROW)) {
+          nextMove = "left";
+        } else if (p5js.keyIsDown(p5js.RIGHT_ARROW)) {
+          nextMove = "right";
+        }
+      
+      // For all other moves, don't repeat them on keydown! Reset nextMove after each tick of game loop
+      } else { 
         nextMove = undefined;
       }
-    }
 
-    console.log(p5js.millis());
-    console.log(p5js.millis() - previousTimestamp);
+    } //end game loop interval check
+
+    //console.log(p5js.millis());
+    //console.log(p5js.millis() - previousTimestamp);
 
 
     // Draw ALL tetromino squares on each frame
@@ -187,22 +204,37 @@ function p5jsInstance ( p5js) {
     if (p5js.keyCode === 32) {
       nextMove = "hard-drop";
       console.log("Key pressed: space");
+    
     } else if (p5js.keyCode === p5js.UP_ARROW || p5js.keyCode === 88) {
       nextMove = "rotate-clockwise";
       console.log("Key pressed: up or X");
+    
     } else if (p5js.keyCode === p5js.CONTROL || p5js.keyCode === 90) {
       nextMove = "rotate-counterclockwise";
       console.log("Key pressed: Ctrl or Z");
+    
     } else if (p5js.keyCode === p5js.LEFT_ARROW) {
       nextMove = "left";
       console.log("Key pressed: left");
+
+      keyDownTimestamp = p5js.millis();
+
     } else if (p5js.keyCode === p5js.RIGHT_ARROW) {
       nextMove = "right";
       console.log("Key pressed: right");
+      
+      keyDownTimestamp = p5js.millis();
+
     } else if (p5js.keyCode === p5js.DOWN_ARROW) {
       nextMove = "soft-drop";
       console.log("Key pressed: down");
+      
+      keyDownTimestamp = p5js.millis();
     }
+
+    console.log("keydowntime: " + keyDownTimestamp);
+
+    console.log("KEYPRESSED nextmove: " + nextMove);
 
   };
 
