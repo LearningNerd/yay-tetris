@@ -104,20 +104,24 @@ function p5jsInstance ( p5js) {
       gameState = tetris.gameLoopTick(nextMove);
       gameOver = gameState.gameOver;
 
-      // Soft-drop is the only move that repeats immediately on keydown
-      if (p5js.keyIsDown(p5js.DOWN_ARROW)) {
-        nextMove = "soft-drop";
-
-      // For left/right, repeat on keydown but only after a delay
-      } else if (p5js.millis() - keyDownTimestamp >= keyRepeatDelay && (p5js.keyIsDown(p5js.LEFT_ARROW) || p5js.keyIsDown(p5js.RIGHT_ARROW)) ) {
+            // For left/right, repeat on keydown but only after a delay
+      if (p5js.millis() - keyDownTimestamp >= keyRepeatDelay && (p5js.keyIsDown(p5js.LEFT_ARROW) || p5js.keyIsDown(p5js.RIGHT_ARROW) ) ) {
         
-        // Set left/right as nextMove
-        if (p5js.keyIsDown(p5js.LEFT_ARROW)) {
+        // Set left/right or down + left/right as nextMove
+        if (p5js.keyIsDown(p5js.DOWN_ARROW) && p5js.keyIsDown(p5js.LEFT_ARROW) ) {
+          nextMove = "left-soft-drop";
+        } else if (p5js.keyIsDown(p5js.DOWN_ARROW) && p5js.keyIsDown(p5js.RIGHT_ARROW) ) {
+          nextMove = "right-soft-drop";
+        } else if (p5js.keyIsDown(p5js.LEFT_ARROW)) {
           nextMove = "left";
         } else if (p5js.keyIsDown(p5js.RIGHT_ARROW)) {
           nextMove = "right";
-        }
-      
+        } 
+
+      // Soft-drop is the only move that repeats immediately on keydown
+      } else if (p5js.keyIsDown(p5js.DOWN_ARROW)) {
+        nextMove = "soft-drop";
+
       // For all other moves, don't repeat them on keydown! Reset nextMove after each tick of game loop
       } else { 
         nextMove = undefined;

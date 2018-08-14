@@ -198,8 +198,9 @@ export function Tetris (rows, cols) {
     //console.log("lastTick: " + this.lastTickTimestamp);  
  
     // Handle left/right/rotate on EVERY TICK
-    if (nextMove !== "hard-drop" && nextMove !== "soft-drop" && nextMove != undefined) {
+    if (nextMove && nextMove !== "hard-drop" && nextMove !== "soft-drop") {
 
+      //console.log(nextMove);
      
       //console.log("gameGrid before updating:");
       this.print(this.gameGrid);
@@ -227,8 +228,12 @@ export function Tetris (rows, cols) {
 
 
     // Move block down on this frame if hard drop, soft drop, or every X ticks
-    if (nextMove === "hard-drop" || nextMove === "soft-drop" || this.lastTickTimestamp % ticksUntilLock === 0) {
+    if (
+         (nextMove && ( nextMove === "hard-drop" || nextMove.includes("soft-drop") ) )
+         || this.lastTickTimestamp % ticksUntilLock === 0
+    ) {
 
+      //console.log("next move part 2: " + nextMove);
       //console.log("Time to move the block down!!! Next move: " + nextMove);
 
       // Save copy of original coordinates

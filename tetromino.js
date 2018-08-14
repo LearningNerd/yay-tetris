@@ -97,10 +97,10 @@ export function Tetromino (topLeftRow, topLeftCol, shape) {
     let rowOffset = 1; // default for down
     let colOffset = 0; // default for down
 
-    if (nextMove === "left") {
+    if (nextMove.includes("left")) {
       rowOffset = 0;
       colOffset = -1;
-    } else if (nextMove === "right") {
+    } else if (nextMove.includes("right")) {
       rowOffset = 0;
       colOffset = 1;
     } else if (nextMove === "rotate-clockwise") {
