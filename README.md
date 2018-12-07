@@ -14,7 +14,7 @@ Just for fun, here's a simple Tetris game built for the web using the canvas API
 <br/>
 
 :notebook: **Sections below:**
-  - [Features to add next](#updates-for-later)
+  - [Features to add next](#next-steps)
   - [My daily notes while building this project](#daily-notes)
 
 <hr/>
