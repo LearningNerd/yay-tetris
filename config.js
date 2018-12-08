@@ -29,4 +29,5 @@ export const OVERRIDE_KEYS = [
   KEYS.Z
 ];
 
+export const FRAMES_PER_SECOND = 10;
 

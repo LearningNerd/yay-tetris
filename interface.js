@@ -1,10 +1,6 @@
 import {Tetris} from "./tetris.js"
 import {MOVES, KEYS, KEY_MAP} from "./constants.js"
-import {KEY_MOVE_MAP, OVERRIDE_KEYS} from "./config.js"
-
-// Set up p5js to run in instance mode
-// -- for now, this solves the issue of p5js not working when my main JS file has type="module"
-let p5js = new p5(p5jsInstance);
+import {FRAMES_PER_SECOND, KEY_MOVE_MAP, OVERRIDE_KEYS} from "./config.js"
 
 // Track when a key was initially pressed down (used for repeating moves after a delay)
 let keyDownTimestamp = 0;
@@ -40,6 +36,22 @@ let pressedKeys = {};
   const canvasWidth = leftMargin + rightMargin + playfieldWidth + nextQueueWidth + nextQueueLeftMargin;
   const canvasHeight = playfieldHeight + 75;
 
+
+// Create and initialize canvas
+let canvasElem = document.createElement("canvas");
+canvasElem.setAttribute('width', canvasWidth);
+canvasElem.setAttribute('height', canvasHeight);
+canvasElem.id = "defaultCanvas0";
+canvasElem.textContent = "This is a Tetris game! But you'll need a modern web browser with JavaScript enabled to play the game.";
+document.body.appendChild(canvasElem);
+
+// Set up 2d drawing context, which provides access to all drawing functions
+const draw = canvasElem.getContext('2d');
+console.log(draw);
+
+
+
+
   // Will be updated in game loop 
   let gameOver = false;
 
@@ -57,13 +69,7 @@ let pressedKeys = {};
   let gameState;
 
 
-
-// nextMove = keyMoveMap[ keyMap[event.key || event.keyCode] ];
-// .... or ....
-// const KEY = keyMap[event.key || event.keyCode]
-// nextMove = keyMoveMap[KEY];
-
-document.addEventListener("keydown", function(event){
+document.addEventListener("keydown", function(event) {
   
   // Normalize key codes across browsers (see notes in constants.js)
   const currentKey = KEY_MAP[event.key || event.keyCode];
@@ -102,7 +108,7 @@ document.addEventListener("keydown", function(event){
 
 }); // end keyDown handler
 
-document.addEventListener("keyup", function(event){
+document.addEventListener("keyup", function(event) {
   const currentKey = KEY_MAP[event.key || event.keyCode];
   if (currentKey === undefined) { return; } // only handle game control keys
   pressedKeys[currentKey] = false; // Remove from pressedKeys once released
@@ -111,53 +117,18 @@ document.addEventListener("keyup", function(event){
 // Release all keys when window loses focus
 // (to prevent weird bugs when switching windows while keys are still held down)
 // Thanks to p5js library source code for making me aware of this issue!
-window.addEventListener("blur", function(event){
+window.addEventListener("blur", function(event) {
   pressedKeys = {};
 });
 
-function p5jsInstance ( p5js) {
 
-  // Runs once to set up the canvas element and p5js animation stuff
-  p5js.setup = function() {
-
-    //console.log("Called p5js setup()");
-    
-    // Fix for retina displays (bug: clear() only clears top left corner of canvas)
-    //  p5js.pixelDensity(1);
-
-    // *** REMOVE P5JS ***
-    p5js.createCanvas(canvasWidth, canvasHeight);
-
-    // const canvasContext = canvas.getContext('2d');
-
-    /*
-    let canvasElem = document.createElement("canvas");
-    canvasElem.setAttribute('width', canvasWidth);
-    canvasElem.setAttribute('height', canvasHeight);
-    canvasElem.id = "defaultCanvas0";
-    document.body.appendChild(canvasElem);
-    */
-
-    // 2 frames per second, easier for testing :)
-    p5js.frameRate(frameRate);
-    
-    // FOR TESTING: don't automatically draw next frames!
-    //  p5js.noLoop();
-    
-  }; // end p5js.setup
+///////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////
 
 
-  // FOR TESTING UPDATE WITH REAL TETROMINOES:
-  p5js.draw = function() {
 
-    // Clear the canvas on each frame
-    p5js.clear();
-    // canvasContext.clearRect(0, 0, canvasWidth, canvasHeight);
+function updateGame () {
 
-    // Draw the Tetris playfield
-    p5js.fill("#eee");
-    p5js.rect(playfieldXPos, playfieldYPos, playfieldWidth, playfieldHeight);
- 
     // Run game loop every X milliseconds (loopIntervalMillis) -- or initiate
     if (window.performance.now() - previousTimestamp >= loopIntervalMillis || window.performance.now() < loopIntervalMillis) {
       previousTimestamp = window.performance.now();
@@ -165,7 +136,6 @@ function p5jsInstance ( p5js) {
       // Update game state with next move, returns updated state with: sqaures array, score number, gameOver, and tetrominoQueue array
       // NOTE: must run this BEFORE key repeat/reset conditions below; otherwise, non-repeatable moves like rotation WON'T be triggered at all
       gameState = tetris.gameLoopTick(nextMove);
-      gameOver = gameState.gameOver;
 
       // For left/right, repeat on keydown but only after a delay! Matches original game better, and easier to move 1 space at a time if needed
       // (Otherwise, it's easy to accidentally move 2 or more spaces if you don't release the key soon enough)
@@ -192,80 +162,117 @@ function p5jsInstance ( p5js) {
 
     } //end game loop interval check
 
-    // Draw ALL tetromino squares on each frame
-    gameState.squares.forEach( s => {
+  return gameState;
+} // end updateGame();
+
+
+
+function drawFrame(gameState) {
+
+  // Clear canvas between frames and draw background color
+  draw.clearRect(0, 0, canvasWidth, canvasHeight);
+  draw.fillStyle = '#eee';
+  draw.fillRect(playfieldXPos, playfieldYPos, playfieldWidth, playfieldHeight);
+
+  // Draw ALL tetromino squares on each frame
+  gameState.squares.forEach( s => {
+
+    // Actual coordinates for drawing: multiple row/col by the blockSize (pixel value)
+    let xPos = playfieldXPos + s.col * blockSize;
+    let yPos = playfieldYPos + s.row * blockSize;
+
+    draw.fillStyle = s.color;
+    draw.fillRect(xPos, yPos, blockSize, blockSize);
+  });
+
+  // Display score! (TODO: display as a DOM element? or expand canvas to have an area for the game and separate area for UI)
+  draw.fillStyle = "#000";
+  draw.font = "25px";
+  draw.textAlign = "center";
+  draw.fillText("Score: " + gameState.score, canvasWidth/2, canvasHeight - 5);
+
+  // Draw "Next" title:
+  draw.fillStyle = "#000";
+  draw.font = "25px";
+  draw.textAlign = "center";
+  draw.fillText("Next:", nextQueueXPos + (nextQueueWidth/2), nextQueueYPos - 30); 
+
+
+
+  // Starting coordinates for first tetromino in the queue
+  let nextXStart = nextQueueXPos;
+  let nextYStart = nextQueueYPos;
+
+  // Draw the next tetrominoes in the queue
+  gameState.tetrominoQueue.forEach( tetromino => {
+
+    let xPos;
+    let yPos;
+
+    // Get the lowest (left-most) column value; use that to remove the offset, shift back to column 0
+    let colOffset = tetromino.squares.map(s => s.col).reduce( (min, cur) => {return Math.min(min, cur)}, cols);
+    [0].col;
+
+    tetromino.squares.forEach ( s => {
+
+      // Draw each square based on its coordinates but relative to the queue section
+      // and remove offset so the column values start at 0 (unlike in the game, where they spawn in the center column)
+      xPos = nextXStart + (s.col - colOffset) * blockSize;
+      yPos = nextYStart + s.row * blockSize;
+
+      draw.fillStyle = s.color;
+      draw.fillRect(xPos, yPos, blockSize, blockSize);
+
+    }); 
+
+    // Next tetromino will be drawn below the previous one, with a margin of 1 row
+    nextYStart = yPos + blockSize * 2;
+
+  });
+
+  // If the game is over, say so! (TODO: replay option)
+  if (gameState.gameOver) {
+    draw.fillStyle = "red";
+    draw.font = "50px";
+    draw.textAlign = "center";
+    draw.fillText("Game over!\n:(", canvasWidth/2, canvasHeight/2 - 50); 
+  }
+
+} // end drawFrame()
+
+
+
+
+
+
+
+// This unique ID lets us turn the animation off later if needed
+let animationId;
+let nextFrameTimestamp = 0;
+
+// Animation loop with requestAnimationFrame 
+function animate(currentTimestamp) {
+
+  // Repeat the loop WITHOUT animating if it hasn't been long enough yet.
+  if (currentTimestamp < nextFrameTimestamp) {
+    animationId = window.requestAnimationFrame(animate);
+    return;
+  }
   
-      // Actual coordinates for drawing: multiple row/col by the blockSize (pixel value)
-      let xPos = playfieldXPos + s.col * blockSize;
-      let yPos = playfieldYPos + s.row * blockSize;
-   
-      p5js.fill(s.color); 
-      p5js.rect(xPos, yPos, blockSize, blockSize);
-    });
-
+  // If it HAS been long enough, update time for the next animation frame
+  nextFrameTimestamp = currentTimestamp + (FRAMES_PER_SECOND * 10);
   
-    // Display score! (TODO: display as a DOM element? or expand canvas to have an area for the game and separate area for UI)
-    p5js.fill(0);
-    p5js.textSize(25);
-    p5js.textAlign("center");
-    p5js.text("Score: " + gameState.score, canvasWidth/2, canvasHeight - 5);
+  // Clear the whole canvas between each animation frame
+  draw.clearRect(0, 0, canvasWidth, canvasHeight);
+ 
+  // Repeat the animation loop forever (until we stop it)
+  animationId = window.requestAnimationFrame(animate);
+  
+  // Update the game state, drawing everything for the current animation frame as needed
+  let gameState = updateGame();
+  drawFrame(gameState);
+}
 
-
-    // Draw background for queue of next tetrominoes
-    // p5js.fill("#eee");
-    // p5js.rect(nextQueueXPos, nextQueueYPos, nextQueueWidth, nextQueueHeight);
-
-    // Draw "Next" title:
-    p5js.fill(0);
-    p5js.textSize(25);
-    p5js.textAlign("center");
-    p5js.text("Next:", nextQueueXPos + (nextQueueWidth/2), nextQueueYPos - 30); 
-
-
-
-    // Starting coordinates for first tetromino in the queue
-    let nextXStart = nextQueueXPos;
-    let nextYStart = nextQueueYPos;
-
-    // Draw the next tetrominoes in the queue
-    gameState.tetrominoQueue.forEach( tetromino => {
-
-      let xPos;
-      let yPos;
-
-      // Get the lowest (left-most) column value; use that to remove the offset, shift back to column 0
-      let colOffset = tetromino.squares.map(s => s.col).reduce( (min, cur) => {return Math.min(min, cur)}, cols);
-[0].col;
-
-      tetromino.squares.forEach ( s => {
-
-        // Draw each square based on its coordinates but relative to the queue section
-        // and remove offset so the column values start at 0 (unlike in the game, where they spawn in the center column)
-        xPos = nextXStart + (s.col - colOffset) * blockSize;
-        yPos = nextYStart + s.row * blockSize;
-   
-        p5js.fill(s.color); 
-        p5js.rect(xPos, yPos, blockSize, blockSize);
-           
-      }); 
-
-      // Next tetromino will be drawn below the previous one, with a margin of 1 row
-      nextYStart = yPos + blockSize * 2;
-
-    });
-
-
-    // If the game is over, say so! (TODO: replay option)
-    if (gameOver) {
-      p5js.fill("red");
-      p5js.textSize(50);
-      p5js.textAlign("center");
-      p5js.text("Game over!\n:(", canvasWidth/2, canvasHeight/2 - 50); 
-      p5js.noLoop();      
-    }
-
-
-  }; // end updated p5js draw()
-
-} // end p5jsInstance
+// Start the animation loop!
+animationId = window.requestAnimationFrame(animate);
 
