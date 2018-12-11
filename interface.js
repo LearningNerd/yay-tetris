@@ -1,6 +1,7 @@
-import {Tetris} from "./tetris.js"
-import {MOVES, KEYS, KEY_MAP} from "./constants.js"
-import {FRAMES_PER_SECOND, KEY_MOVE_MAP, OVERRIDE_KEYS} from "./config.js"
+import {Tetris} from "./tetris.js";
+import {MOVES, KEYS, KEY_MAP, ASCII_EMOJIS} from "./constants.js";
+import {getRandomIntInclusive} from "./helperFunctions.js";
+import {FRAMES_PER_SECOND, KEY_MOVE_MAP, OVERRIDE_KEYS} from "./config.js";
 
 // Track when a key was initially pressed down (used for repeating moves after a delay)
 let keyDownTimestamp = 0;
@@ -125,8 +126,6 @@ window.addEventListener("blur", function(event) {
 ///////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////
 
-
-
 function updateGame () {
 
     // Run game loop every X milliseconds (loopIntervalMillis) -- or initiate
@@ -169,10 +168,16 @@ function updateGame () {
 
 function drawFrame(gameState) {
 
+  // Default for all shapes
+  draw.strokeStyle = "#444";
+
   // Clear canvas between frames and draw background color
   draw.clearRect(0, 0, canvasWidth, canvasHeight);
   draw.fillStyle = '#eee';
+  setCanvasShadow(draw, "rgba(0, 0, 0, 0.4)", 2, 2, 4);
   draw.fillRect(playfieldXPos, playfieldYPos, playfieldWidth, playfieldHeight);
+  resetShadow(draw);
+  draw.strokeRect(playfieldXPos, playfieldYPos, playfieldWidth, playfieldHeight);
 
   // Draw ALL tetromino squares on each frame
   gameState.squares.forEach( s => {
@@ -183,21 +188,14 @@ function drawFrame(gameState) {
 
     draw.fillStyle = s.color;
     draw.fillRect(xPos, yPos, blockSize, blockSize);
+    draw.strokeRect(xPos, yPos, blockSize, blockSize);
   });
 
-  // Display score! (TODO: display as a DOM element? or expand canvas to have an area for the game and separate area for UI)
-  draw.fillStyle = "#000";
-  draw.font = "25px";
-  draw.textAlign = "center";
-  draw.fillText("Score: " + gameState.score, canvasWidth/2, canvasHeight - 5);
+  // Display score! (TODO: display as a DOM element? or expand canvas to have an area for the game and separate area for UI?)
+  drawCanvasSmallHeading(draw, "Score: " + gameState.score, canvasWidth/2, canvasHeight - 5);
 
   // Draw "Next" title:
-  draw.fillStyle = "#000";
-  draw.font = "25px";
-  draw.textAlign = "center";
-  draw.fillText("Next:", nextQueueXPos + (nextQueueWidth/2), nextQueueYPos - 30); 
-
-
+  drawCanvasSmallHeading(draw, "Next:", nextQueueXPos + (nextQueueWidth/2), nextQueueYPos - 30);
 
   // Starting coordinates for first tetromino in the queue
   let nextXStart = nextQueueXPos;
@@ -221,7 +219,10 @@ function drawFrame(gameState) {
       yPos = nextYStart + s.row * blockSize;
 
       draw.fillStyle = s.color;
+      setCanvasShadow(draw, "rgba(0, 0, 0, 0.3)", 2, 2, 3);
       draw.fillRect(xPos, yPos, blockSize, blockSize);
+      resetShadow(draw);
+      draw.strokeRect(xPos, yPos, blockSize, blockSize);
 
     }); 
 
@@ -230,20 +231,13 @@ function drawFrame(gameState) {
 
   });
 
-  // If the game is over, say so! (TODO: replay option)
+  // If the game is over, say so! (TODO: replay option; add a subtle animation)
   if (gameState.gameOver) {
-    draw.fillStyle = "red";
-    draw.font = "50px";
-    draw.textAlign = "center";
-    draw.fillText("Game over!\n:(", canvasWidth/2, canvasHeight/2 - 50); 
+    cancelAnimationFrame(animationId);
+    drawGameOver(draw); 
   }
 
 } // end drawFrame()
-
-
-
-
-
 
 
 // This unique ID lets us turn the animation off later if needed
@@ -254,14 +248,15 @@ let nextFrameTimestamp = 0;
 function animate(currentTimestamp) {
 
   // Repeat the loop WITHOUT animating if it hasn't been long enough yet.
+  // This is to get that non-smooth, blocky animation style like old-school Tetris
   if (currentTimestamp < nextFrameTimestamp) {
     animationId = window.requestAnimationFrame(animate);
     return;
   }
   
   // If it HAS been long enough, update time for the next animation frame
-  nextFrameTimestamp = currentTimestamp + (FRAMES_PER_SECOND * 10);
-  
+  nextFrameTimestamp = currentTimestamp + (1000/FRAMES_PER_SECOND);
+
   // Clear the whole canvas between each animation frame
   draw.clearRect(0, 0, canvasWidth, canvasHeight);
  
@@ -275,4 +270,60 @@ function animate(currentTimestamp) {
 
 // Start the animation loop!
 animationId = window.requestAnimationFrame(animate);
+
+
+
+// Set shadow properties using canvas API:
+//  canvasContext: drawing context for the canvas element
+//  color: a string like "#fff" or "rgba(0,0,0,0.5)"
+//  xOffset, yOffset, blurRadius: integer value
+function setCanvasShadow(canvasContext, color, xOffset, yOffset, blurRadius) {
+  canvasContext.shadowOffsetX = xOffset;
+  canvasContext.shadowOffsetY = yOffset;
+  canvasContext.shadowBlur = blurRadius;
+  canvasContext.shadowColor = color;
+}
+
+
+// Reset shadow (0 opacity)
+// TODO: look this up; surely there's a better way, lol!
+function resetShadow(canvasContext) {
+  canvasContext.shadowColor = "rgba(0, 0, 0, 0.0)";
+}
+
+
+// Canvas styles for small headings
+// text: string of text to draw
+// xPos, yPos: integer value for top/left starting coordinate in pixels
+function drawCanvasSmallHeading(canvasContext, text, xPos, yPos) {
+  setCanvasShadow(canvasContext, "rgba(0, 0, 0, 0.3)", 1, 1, 2);
+  canvasContext.fillStyle = "#555";
+  canvasContext.font = "30px sans-serif";
+  canvasContext.textAlign = "center";
+  canvasContext.fillText(text, xPos, yPos);
+  setCanvasShadow(draw, "rgba(0, 0, 0, 0.4)", 1, 1, 4);
+  resetShadow(canvasContext);
+}
+
+
+// Draw "Game over" text and a sad/mad ASCII emoji
+function drawGameOver(canvasContext) {
+
+  // Semi-transparent white mask over the game
+  canvasContext.fillStyle = "rgba(255, 255, 255, 0.8)";
+  canvasContext.fillRect(0, 0, canvasWidth, canvasHeight);
+
+  // Large "game over" text
+  canvasContext.fillStyle = "#555";
+  canvasContext.font = "50px sans-serif";
+  canvasContext.textAlign = "center";
+  setCanvasShadow(canvasContext, "rgba(0, 0, 0, 0.3)", 1, 1, 3);
+  canvasContext.fillText("Game over!", canvasWidth/2, canvasHeight/2 - 65); 
+
+  // Draw a random sad or mad ASCII emoji from array in constants.js
+  const EMOJI = ASCII_EMOJIS[getRandomIntInclusive(0, ASCII_EMOJIS.length-1)];
+  canvasContext.font = "40px sans-serif";
+  canvasContext.fillText(EMOJI, canvasWidth/2, canvasHeight/2 + 15); 
+  resetShadow(canvasContext);
+}
 

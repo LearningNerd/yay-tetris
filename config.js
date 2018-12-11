@@ -29,5 +29,6 @@ export const OVERRIDE_KEYS = [
   KEYS.Z
 ];
 
-export const FRAMES_PER_SECOND = 10;
+// Remember: this can't be 0, otherwise the universe will implode!
+export const FRAMES_PER_SECOND = 60;
 

@@ -63,3 +63,17 @@ export const MOVES = {
   ROTATE_COUNTER_CLOCKWISE: "rotate-counterclockwise"
 };
 
+export const ASCII_EMOJIS = [
+  "(╯°□°）╯︵ ┻━┻",
+  "(ᵟຶ︵ ᵟຶ)",
+  "(T＿T)",
+  "┻━┻ ︵ヽ(`Д´)ﾉ︵ ┻━┻",
+  "ಥ╭╮ಥ",
+  ".·´¯`(>▂<)´¯`·.",
+  "	( º﹃º )",
+  "(ノಠ益ಠ)ノ彡┻━┻",
+  "｡ﾟ･（>﹏<）･ﾟ｡",
+  "(≧︿≦)",
+  "‧º·(˚ ˃̣̣̥⌓˂̣̣̥ )‧º·˚",
+  "(︶︹︶)"
+];
