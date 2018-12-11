@@ -44,13 +44,10 @@ canvasElem.setAttribute('width', canvasWidth);
 canvasElem.setAttribute('height', canvasHeight);
 canvasElem.id = "defaultCanvas0";
 canvasElem.textContent = "This is a Tetris game! But you'll need a modern web browser with JavaScript enabled to play the game.";
-document.body.appendChild(canvasElem);
+document.getElementById("game").appendChild(canvasElem);
 
 // Set up 2d drawing context, which provides access to all drawing functions
 const draw = canvasElem.getContext('2d');
-console.log(draw);
-
-
 
 
   // Will be updated in game loop 

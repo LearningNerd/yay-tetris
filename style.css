@@ -1,18 +1,48 @@
-/* CSS files add styling rules to your content */
-
 body {
   font-family: "Benton Sans", "Helvetica Neue", helvetica, arial, sans-serif;
-  margin: 2em;
-
+  color: #444;
+  margin: 1em auto;
+  padding: 1em;
+  max-width: 40em;
   text-align: center;
 }
 
-h1 {
-  font-style: italic;
-  color: #373fff;
+p, ul, li {
+  text-align: left;
+  line-height: 1.5;
+}
+
+li {
+  margin-bottom: 0.5em;
+  padding-left: 0.5em;
+}
+
+a {
+  text-decoration: none;
+  color: #1E90FF;
+}
+
+h1, h2 {
+  font-family: 'Press Start 2P', sans-serif;
+  font-size: 2em;
+  text-align: center;
+  margin-top: 0;
+  color: #444;
+}
+
+h2 {
+  font-size: 1.3em;
+  text-align: left;
+  margin-bottom: 0.5em;
 }
 
 canvas {
-  margin: 2em auto;
+  margin: 1em auto;
+}
+
+.controls {
+  text-align: center;
+  max-width: 30em;
+  margin: 1em auto;
 }
 

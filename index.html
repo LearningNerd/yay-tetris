@@ -7,15 +7,35 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     
     <!-- import the webpage's stylesheet -->
+    <link href="https://fonts.googleapis.com/css?family=Press+Start+2P" rel="stylesheet">
     <link rel="stylesheet" href="style.css">
-    
+
     <!-- import the main javascript file as an ES6 module -->
     <script type="module" src="interface.js"></script>
-  </head>  
+  </head>
+
   <body>
-    
-    
-    
+
+    <header>
+      <h1>Yay Tetris!</h1>
+      <p>
+        Hi there, I'm <a href="https://twitter.com/LearningNerd">Liz Krane</a>! Just for fun, I built this simple Tetris game "from scratch" with vanilla JavaScript and the web browsers' built-in Canvas API. <a href="https://github.com/LearningNerd/yay-tetris">See my <strong>GitHub repo</strong> for code and more details</a>, or just play! (Controls listed below)
+      </p>
+    </header>
+
+    <section id="game">
+    </section>
+
+    <section class="controls">
+      <h2>Controls</h2>
+      <ul>
+        <li>Left/right arrow keys: move left/right</li>
+        <li>Up arrow or X: rotate clockwise</li>
+        <li>Z or Ctrl key: rotate counter-clockwise</li>
+        <li>Down arrow: soft drop (move down faster)</li>
+        <li>Space bar: hard drop (instantly drop to bottom)</li>
+      </ul>
+    </section>
   </body>
 </html>
 
