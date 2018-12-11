@@ -378,7 +378,9 @@ No coding. Nice lazy Sunday.
   - Fixed a tiny edge case: previously, holding left and then also holding down right arrow key would cause the tetromino to still repeat moving to the left, because that was the order of the conditional statements. I'm sure it would rarely happen, but it definitely shouldn't work that way! One small change to fix it: track which key was the most recent one pressed, and only repeat left or right if it's held down *and* the most recently pressed key.
 
   - Published version 1 on GitHub here: https://github.com/LearningNerd/yay-tetris/! I included these notes in the README file for the project, along with the below list of next to-dos for whenever I decide to revisit the project.
-  
+
+<hr/>
+
 ### 2018-12-07 (No longer counting days, lol)
 
 Hello, again! After a nice long break spent on other projects and learning more cool stuff, I'm back to do some refactoring! This Tetris code really needs some love and attention.
@@ -413,6 +415,8 @@ Resources:
   - https://w3c.github.io/uievents/
   - https://developer.mozilla.org/en-US/docs/Web/API/KeyboardEvent
   - https://medium.com/@uistephen/keyboardevent-key-for-cross-browser-key-press-check-61dbad0a067a
+
+<hr/>
 
 ### 2018-12-10
 
