@@ -5,7 +5,7 @@
 
 <br/>
 
-Just for fun, here's a simple Tetris game built for the web using the canvas API with a little help from the awesome [p5js JavaScript library](https://p5js.org/). This project was part of my #100DaysOfCode experiment to explore and learn new things.
+Just for fun, here's a simple Tetris game built "from scratch" with vanilla JavaScript and the web browsers' built-in []Canvas API](https://developer.mozilla.org/en-US/docs/Web/API/Canvas_API). This project was originally part of my #100DaysOfCode experiment to explore some new programming topics every day..
 
 <br/>
 
@@ -23,8 +23,8 @@ Just for fun, here's a simple Tetris game built for the web using the canvas API
 
 Version 1 is complete, and it's on hold for the moment. But when I'm ready for more Tetris, here's my backlog of to-dos:
 
-  - Refactoring! The code is still pretty messy.
-  - Bundle the JS files and transpile (learn about Webpack etc for this, probably!)
+  - More refactoring! (*Always* more refactoring!)
+  - Bundle the JS files and transpile for older browsers (learn about Webpack etc for this, probably!)
   - Add replay button (so users don't need to refresh the page to play again)
   - Add basic wall kicks (see [bottom of this page on Tetris rotation systems](https://strategywiki.org/wiki/Tetris/Rotation_systems) for reference)
   - Maybe: flesh out the scoring system
@@ -379,3 +379,46 @@ No coding. Nice lazy Sunday.
 
   - Published version 1 on GitHub here: https://github.com/LearningNerd/yay-tetris/! I included these notes in the README file for the project, along with the below list of next to-dos for whenever I decide to revisit the project.
   
+### 2018-12-07 (No longer counting days, lol)
+
+Hello, again! After a nice long break spent on other projects and learning more cool stuff, I'm back to do some refactoring! This Tetris code really needs some love and attention.
+
+Today I removed all p5js code, to review my understanding of the canvas API, to practice refactoring, and to submit this project for my application to [the Recurse Center](https://www.recurse.com/) (which requires a "from scratch" code sample).
+
+**Finished:**
+
+  - Read all about cross-browser compatibility issues with keyboard events and looked through the p5js source code to see what details I'll now need to handle myself
+
+  - Created a file for constants: names of keyboard events, names of game moves, and a mapping for normalized key names.
+
+  - Looked at source code for p5js `millis()` method and found it's literally just a renaming of `window.performance.now()`, lol
+ 
+   - Reused some old code I had written to implement an animation/game loop "from scratch" for the classic Snake game: https://codepen.io/LearnTeachCode/pen/PWVZJZ?editors=0010
+
+  - Relearned how to run a local web server with Python: `python -m SimpleHTTPServer`
+
+  - Solved my bug regarding key presses -- I just need to manually track which keys are being held down!
+
+  - Learned about the "focus" and "blur" events and how they don't bubble up -- but "focusin" and "focusout" do bubble. And you can listen for these events on the `window` object, but not on the `document` object! See: https://www.quirksmode.org/dom/events/blurfocus.html
+
+  - Learned about keyboard "ghosting" and "jamming" -- because of how some keyboards are wired, it won't even register a fourth key if you hold down some combinations of 3 keys! See: https://en.wikipedia.org/wiki/Rollover_(key)
+    - Although that still doesn't totally explain why my keyboard won't register *three* simultaneous arrow key presses... I'm assuming it's just a wiring issue. I want to test this on other keyboards now just for fun!
+
+**Notes on cross-browser keyboard event annoyingness:**
+
+  - Modern browsers implement the "key" property, but IE/Edge use different values for some keys
+  - keyCode "is supported in effectively all browsers (since IE6+, Firefox 2+, Chrome 1+ etc)" via https://caniuse.com/#search=KeyboardEvent.keyCode
+
+Resources:
+  - https://w3c.github.io/uievents/
+  - https://developer.mozilla.org/en-US/docs/Web/API/KeyboardEvent
+  - https://medium.com/@uistephen/keyboardevent-key-for-cross-browser-key-press-check-61dbad0a067a
+
+### 2018-12-10
+
+**Done:**
+  - Confirmed that I've successfully removed all p5js code without breaking the game, yay!
+  - Fixed up and experimented with canvas drawing styles; added some subtle drop shadows, made text bigger and a bit lighter in color
+  - Added ASCII emojis to show a random one for each "game over" screen, so cute!
+  - Updated the top of this README file and pushed these updates to GitHub and to Glitch
+
