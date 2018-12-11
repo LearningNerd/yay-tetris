@@ -5,7 +5,7 @@
 
 <br/>
 
-Just for fun, here's a simple Tetris game built "from scratch" with vanilla JavaScript and the web browsers' built-in []Canvas API](https://developer.mozilla.org/en-US/docs/Web/API/Canvas_API). This project was originally part of my #100DaysOfCode experiment to explore some new programming topics every day..
+Just for fun, here's a simple Tetris game built "from scratch" with vanilla JavaScript and the web browsers' built-in [Canvas API](https://developer.mozilla.org/en-US/docs/Web/API/Canvas_API). This project was originally part of my #100DaysOfCode experiment to explore some new programming topics every day..
 
 <br/>
 
