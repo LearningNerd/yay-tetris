@@ -1,84 +1,13 @@
 // import {p5} from "./node_modules/p5/lib/p5.min.js"
 import {Tetromino} from "./tetromino.js"
 import {getRandomIntInclusive} from "./helperFunctions.js";
+import {TETROMINOES} from "./constants.js";
+import {TICKS_UNTIL_LOCK, TETROMINO_QUEUE_LENGTH} from "./config.js";
 
 export function Tetris (rows, cols) {
 
-  // Hard-coded: tetromino shapes and colors!
-      // NOTE: 2 represents center of rotation 
-  const tetrominoShapes = [
-    {
-      shapeName: "O",
-      color: "#47fffd",  // cyan
-      shapeTemplate:
-      [
-        [1,1],
-        [1,1]
-      ]
-    },
-  
-    { 
-      shapeName: "I",
-      color: "#ffeaa7", // yellow
-      shapeTemplate: [[1,2,1,1]]
-    },
-
-    {
-      shapeName: "T",
-      color: "#c4b1ff", // purple
-      shapeTemplate:
-      [
-        [0,1,0],
-        [1,2,1]
-      ]
-    },
-
-    {
-      shapeName: "L",
-      color: "#ffb347", // orange
-      shapeTemplate:
-      [
-        [0,0,1],
-        [1,2,1]
-      ]
-    },
- 
-    {
-      shapeName: "J",
-      color: "#62b1ff", // blue
-      shapeTemplate:
-      [
-        [1,0,0],
-        [1,2,1]
-      ]
-    },
-     
-    {
-      shapeName: "S",
-      color: "#a8e4a0", // green
-      shapeTemplate: 
-      [
-        [0,2,1],
-        [1,1,0]
-      ]
-    },
-    
-    {
-      shapeName: "Z",
-      color: "#ff7675", // red
-      shapeTemplate: 
-      [
-        [1,2,0],
-        [0,1,1]
-      ]
-    }
-  ];//end shapes
-
-  // Number of ticks/moves allowed before moving tetromino down / potentially locking it
-  const ticksUntilLock = 10;
-
   this.fallenSquares = [];
-  this.lastTickTimestamp = 0; // for now, number of frames
+  this.gameLoopTicks = 0;
   this.score = 0;
   this.gameOver = false;
   
@@ -101,7 +30,7 @@ export function Tetris (rows, cols) {
   // Return a new tetromino to be spawned in left/center col, with a random shape
   this.createTetromino = function() {
     // Assign a random shape to each new tetromino
-    let randomShape = tetrominoShapes[getRandomIntInclusive(0, tetrominoShapes.length-1)];
+    let randomShape = TETROMINOES[getRandomIntInclusive(0, TETROMINOES.length-1)];
 
     // Spawn location: middle or left-middle columns
     let centerPlayfieldCol = Math.floor( this.gameGrid[0].length / 2 ) - 1; // shift to left; starts at col 0
@@ -117,7 +46,6 @@ export function Tetris (rows, cols) {
     let tetrominoLeftCol = centerPlayfieldCol - centerTetrominoCol;
 
     return new Tetromino(0, tetrominoLeftCol, randomShape);
- 
   };
 
 
@@ -175,27 +103,25 @@ export function Tetris (rows, cols) {
 
 
   // Initialize queue
-  this.tetrominoQueue = this.createTetrominoQueue(4);
+  this.tetrominoQueue = this.createTetrominoQueue(TETROMINO_QUEUE_LENGTH);
 
   //console.log([...this.tetrominoQueue]);
 
   // Initialize current tetromino (and queue will now contain 1 less!)
   this.currentTetromino = this.incrementTetromino();
 
-
   //console.log("**** INITIALIZED FIRST TETROMINO ****");
   //console.log([...this.currentTetromino.squares]);
   //console.log({...this.currentTetromino});
- 
  
   this.gameLoopTick = function(nextMove) {
 
     //console.log("called gameLoopTick with nextMove: " + nextMove);
 
     // Update count for how often to move the tetromino down (every X milliseconds or game ticks)
-    this.lastTickTimestamp++; // for now, just counting frames
+    this.gameLoopTicks++; // for now, just counting frames
 
-    //console.log("lastTick: " + this.lastTickTimestamp);  
+    //console.log("lastTick: " + this.gameLoopTicks);  
  
     // Handle left/right/rotate on EVERY TICK
     if (nextMove && nextMove !== "hard-drop" && nextMove !== "soft-drop") {
@@ -230,7 +156,7 @@ export function Tetris (rows, cols) {
     // Move block down on this frame if hard drop, soft drop, or every X ticks
     if (
          (nextMove && ( nextMove === "hard-drop" || nextMove.includes("soft-drop") ) )
-         || this.lastTickTimestamp % ticksUntilLock === 0
+         || this.gameLoopTicks % TICKS_UNTIL_LOCK === 0
     ) {
 
       //console.log("next move part 2: " + nextMove);
@@ -268,6 +194,7 @@ export function Tetris (rows, cols) {
         //console.log("updatedTetromino obj:");
         //console.log(updatedTetromino);
       }
+      
       // Once a collision has been detected, update the game grid to reflect the update
       // (or if no move is possible at all, 
       this.gameGrid = this.updateGameGrid(prevSquares, this.currentTetromino.squares, this.gameGrid); 

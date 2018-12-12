@@ -2,6 +2,10 @@ export const ROWS = 20;
 export const COLS = 10;
 export const BLOCK_SIZE = 25; // size of each square in the grid, in pixels
 
+////////////////////////////////////////////////////////////////////////////
+// Normalizing keys for user input
+////////////////////////////////////////////////////////////////////////////
+  
 // Normalized key names used in KEY_MAP defined below
 export const KEYS = {
   UP: "upArrow",
@@ -55,6 +59,10 @@ export const KEY_MAP = {
   "90": KEYS.Z
 };
 
+////////////////////////////////////////////////////////////////////////////
+// Gameplay
+////////////////////////////////////////////////////////////////////////////
+  
 // Constants for naming game moves/actions
 export const MOVES = {
   LEFT: "left",
@@ -67,24 +75,85 @@ export const MOVES = {
   ROTATE_COUNTER_CLOCKWISE: "rotate-counterclockwise"
 };
 
-export const ASCII_EMOJIS = [
-  "(╯°□°）╯︵ ┻━┻",
-  "(ᵟຶ︵ ᵟຶ)",
-  "(T＿T)",
-  "┻━┻ ︵ヽ(`Д´)ﾉ︵ ┻━┻",
-  "ಥ╭╮ಥ",
-  ".·´¯`(>▂<)´¯`·.",
-  "	( º﹃º )",
-  "(ノಠ益ಠ)ノ彡┻━┻",
-  "｡ﾟ･（>﹏<）･ﾟ｡",
-  "(≧︿≦)",
-  "‧º·(˚ ˃̣̣̥⌓˂̣̣̥ )‧º·˚",
-  "(︶︹︶)"
+
+// Tetrominos: name, shape, and color
+// 2d array for their shapes:
+//  - 0: no square in this position
+//  - 1: a square exists here
+//  - 2: a square exists, AND it's the center of rotation
+export const TETROMINOES = [
+  {
+    shapeName: "O",
+    color: "#47fffd",  // cyan
+    shapeTemplate:
+    [
+      [1,1],
+      [1,1]
+    ]
+  },
+
+  { 
+    shapeName: "I",
+    color: "#ffeaa7", // yellow
+    shapeTemplate: [[1,2,1,1]]
+  },
+
+  {
+    shapeName: "T",
+    color: "#c4b1ff", // purple
+    shapeTemplate:
+    [
+      [0,1,0],
+      [1,2,1]
+    ]
+  },
+
+  {
+    shapeName: "L",
+    color: "#ffb347", // orange
+    shapeTemplate:
+    [
+      [0,0,1],
+      [1,2,1]
+    ]
+  },
+
+  {
+    shapeName: "J",
+    color: "#62b1ff", // blue
+    shapeTemplate:
+    [
+      [1,0,0],
+      [1,2,1]
+    ]
+  },
+
+  {
+    shapeName: "S",
+    color: "#a8e4a0", // green
+    shapeTemplate: 
+    [
+      [0,2,1],
+      [1,1,0]
+    ]
+  },
+
+  {
+    shapeName: "Z",
+    color: "#ff7675", // red
+    shapeTemplate: 
+    [
+      [1,2,0],
+      [0,1,1]
+    ]
+  }
 ];
 
-//////////////////////////////////////////////////////////
+
+  
+////////////////////////////////////////////////////////////////////////////
 // Canvas drawing / dimensions
-//////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////
 const CANVAS_MARGINS = {
   TOP: 5,
   LEFT: 15,
@@ -113,4 +182,19 @@ export const NEXTQUEUE_DIMENSIONS = {
 export const CANVAS_WIDTH = CANVAS_MARGINS.LEFT + CANVAS_MARGINS.RIGHT + PLAYFIELD_DIMENSIONS.WIDTH + NEXTQUEUE_DIMENSIONS.WIDTH + NEXTQUEUE_MARGIN_LEFT;
 
 export const CANVAS_HEIGHT = PLAYFIELD_DIMENSIONS.HEIGHT + 75;
+
+export const ASCII_EMOJIS = [
+  "(╯°□°）╯︵ ┻━┻",
+  "(ᵟຶ︵ ᵟຶ)",
+  "(T＿T)",
+  "┻━┻ ︵ヽ(`Д´)ﾉ︵ ┻━┻",
+  "ಥ╭╮ಥ",
+  ".·´¯`(>▂<)´¯`·.",
+  "	( º﹃º )",
+  "(ノಠ益ಠ)ノ彡┻━┻",
+  "｡ﾟ･（>﹏<）･ﾟ｡",
+  "(≧︿≦)",
+  "‧º·(˚ ˃̣̣̥⌓˂̣̣̥ )‧º·˚",
+  "(︶︹︶)"
+];
 

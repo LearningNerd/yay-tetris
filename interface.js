@@ -1,6 +1,6 @@
 import {Tetris} from "./tetris.js";
-import {MOVES, KEYS, KEY_MAP, ASCII_EMOJIS, CANVAS_WIDTH, CANVAS_HEIGHT, PLAYFIELD_DIMENSIONS, NEXTQUEUE_DIMENSIONS, ROWS, COLS, BLOCK_SIZE} from "./constants.js";
 import {getRandomIntInclusive} from "./helperFunctions.js";
+import {MOVES, KEYS, KEY_MAP, ASCII_EMOJIS, CANVAS_WIDTH, CANVAS_HEIGHT, PLAYFIELD_DIMENSIONS, NEXTQUEUE_DIMENSIONS, ROWS, COLS, BLOCK_SIZE} from "./constants.js";
 import {FRAMES_PER_SECOND, GAME_LOOP_TICKS_PER_SECOND, KEY_REPEAT_DELAY, KEY_MOVE_MAP, OVERRIDE_KEYS} from "./config.js";
 
 ///////////////////////////////////////////////////////////////////////

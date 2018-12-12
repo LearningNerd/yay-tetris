@@ -40,4 +40,9 @@ export const FRAMES_PER_SECOND = 60;
 // This allows for game actions (like automatically moving the tetromino down) to be a certain speed independent of the animation frame rate
 export const GAME_LOOP_TICKS_PER_SECOND = 30;
 
+// Number of game loop ticks allowed before moving tetromino down / potentially locking it
+export const TICKS_UNTIL_LOCK = 10;
+
+// Number of tetrominoes in the "next" queue
+export const TETROMINO_QUEUE_LENGTH = 4;
 
