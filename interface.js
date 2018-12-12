@@ -1,7 +1,7 @@
 import {Tetris} from "./tetris.js";
 import {getRandomIntInclusive} from "./helperFunctions.js";
 import {MOVES, KEYS, KEY_MAP, ASCII_EMOJIS, CANVAS_WIDTH, CANVAS_HEIGHT, PLAYFIELD_DIMENSIONS, NEXTQUEUE_DIMENSIONS, ROWS, COLS, BLOCK_SIZE} from "./constants.js";
-import {FRAMES_PER_SECOND, GAME_LOOP_TICKS_PER_SECOND, KEY_REPEAT_DELAY, KEY_MOVE_MAP, OVERRIDE_KEYS} from "./config.js";
+import {TICKS_PER_SECOND, KEY_REPEAT_DELAY, KEY_MOVE_MAP, OVERRIDE_KEYS} from "./config.js";
 
 ///////////////////////////////////////////////////////////////////////
 // Interface variables (needed for multiple interface functions)
@@ -92,13 +92,9 @@ window.addEventListener("blur", function(event) {
 // Game loop / animation functions
 ///////////////////////////////////////////////////////////////////////
 
-// Run game loop every X milliseconds (GAME_LOOP_TICKS_PER_SECOND) -- or initiate
+// Run game loop every X milliseconds (TICKS_PER_SECOND) -- or initiate
 // This allows for game actions (like automatically moving the tetromino down) to be a certain speed independent of the animation frame rate
 function updateGame () {
-  // Only run the next tick of the game loop if enough time has elapsed
-  if (window.performance.now() >= nextGameLoopTimestamp) {
-    // Update the timestamp for the next tick
-    nextGameLoopTimestamp = window.performance.now() + (1000/GAME_LOOP_TICKS_PER_SECOND);
 
     // Update game state with next move, returns updated state with: sqaures array, score number, gameOver, and tetrominoQueue array
     // NOTE: must run this BEFORE key repeat/reset conditions below; otherwise, non-repeatable moves like rotation WON'T be triggered at all
@@ -131,8 +127,6 @@ function updateGame () {
       nextMove = undefined;
     }
 
-  } //end game loop interval check
-
   return gameState;
 } // end updateGame
 
@@ -162,22 +156,25 @@ function drawFrame(gameState, canvasContext) {
 
 // Animation loop with requestAnimationFrame 
 function animate(currentTimestamp) {
-
-  // Repeat the loop WITHOUT animating if it hasn't been long enough yet.
-  // This is to get that non-smooth, blocky animation style like old-school Tetris
-  if (currentTimestamp < nextFrameTimestamp) {
-    animationId = window.requestAnimationFrame(animate);
-    return;
-  }
   
-  // If it HAS been long enough, update time for the next animation frame
-  nextFrameTimestamp = currentTimestamp + (1000/FRAMES_PER_SECOND);
-
   // Repeat the animation loop forever (until we stop it)
+  // NOTE: Important to run this *before* updating game state,
+  // otherwise when game is over, animation will restart after
+  // being cancelled in updateGame()
   animationId = window.requestAnimationFrame(animate);
-  
-  // Update the game state, drawing everything for the current animation frame as needed
-  gameState = updateGame();
+
+  // Only update game state every [TICKS_PER_SECOND]
+  if (currentTimestamp >= nextGameLoopTimestamp) {
+    
+    // Update the timestamp for the next tick
+    nextGameLoopTimestamp = currentTimestamp + (1000/TICKS_PER_SECOND);
+    
+    gameState = updateGame();
+  }
+
+  // Draw frames as often as possible (between game loop ticks),
+  // so future transitions / particle effects / etc still look smooth
+  // while keeping the Tetris game movements nice and blocky
   drawFrame(gameState, canvasContext);
 }
 
