@@ -434,5 +434,6 @@ Resources:
   - Refactored interface module, much cleaner now! Moved stuff into separate functions, re-ordered some code into a coherent order.
   - Moved "ticks until lock" to `config.js` and moved the definition of tetromino shapes to `constants.js`
   - Minor refactoring for Tetris module
-  - Reviewed how the game works, why I had two separate loops for animation and the game loop... although I'm still not sure if I need the game loop in the interface module *and* the loop inside the Tetris module (which determines when to automatically move a tetromino down)
+  - Reviewed how the game works, why I had basically 3 loops for animation/game loop
+  - Removed loop for throttle animation FPS; don't need it! Refactored to move game ticks per second loop into the `animate` function in `interface.js`, pulling it outside of the `updateGame` function.
 
