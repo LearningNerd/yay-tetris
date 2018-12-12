@@ -426,3 +426,13 @@ Resources:
   - Added ASCII emojis to show a random one for each "game over" screen, so cute!
   - Updated the top of this README file and pushed these updates to GitHub and to Glitch
 
+<hr/>
+
+### 2018-12-12
+
+**Done:**
+  - Refactored interface module, much cleaner now! Moved stuff into separate functions, re-ordered some code into a coherent order.
+  - Moved "ticks until lock" to `config.js` and moved the definition of tetromino shapes to `constants.js`
+  - Minor refactoring for Tetris module
+  - Reviewed how the game works, why I had two separate loops for animation and the game loop... although I'm still not sure if I need the game loop in the interface module *and* the loop inside the Tetris module (which determines when to automatically move a tetromino down)
+
