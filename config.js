@@ -29,6 +29,15 @@ export const OVERRIDE_KEYS = [
   KEYS.Z
 ];
 
+// Milliseconds until key auto-repeats for left/right/soft-drop
+export const KEY_REPEAT_DELAY = 120; 
+
+// Animation speed
 // Remember: this can't be 0, otherwise the universe will implode!
 export const FRAMES_PER_SECOND = 60;
+
+// Update the game loop every X milliseconds
+// This allows for game actions (like automatically moving the tetromino down) to be a certain speed independent of the animation frame rate
+export const GAME_LOOP_TICKS_PER_SECOND = 30;
+
 

@@ -1,71 +1,40 @@
 import {Tetris} from "./tetris.js";
-import {MOVES, KEYS, KEY_MAP, ASCII_EMOJIS} from "./constants.js";
+import {MOVES, KEYS, KEY_MAP, ASCII_EMOJIS, CANVAS_WIDTH, CANVAS_HEIGHT, PLAYFIELD_DIMENSIONS, NEXTQUEUE_DIMENSIONS, ROWS, COLS, BLOCK_SIZE} from "./constants.js";
 import {getRandomIntInclusive} from "./helperFunctions.js";
-import {FRAMES_PER_SECOND, KEY_MOVE_MAP, OVERRIDE_KEYS} from "./config.js";
+import {FRAMES_PER_SECOND, GAME_LOOP_TICKS_PER_SECOND, KEY_REPEAT_DELAY, KEY_MOVE_MAP, OVERRIDE_KEYS} from "./config.js";
+
+///////////////////////////////////////////////////////////////////////
+// Interface variables (needed for multiple interface functions)
+///////////////////////////////////////////////////////////////////////
+
+let gameState; // Keep a reference to gameState across animation loop ticks
+let nextMove; // Action for next game loop tick
+let gameOver = false;
 
 // Track when a key was initially pressed down (used for repeating moves after a delay)
 let keyDownTimestamp = 0;
+let pressedKeys = {}; // Manually track which keys are being held
+let lastDirectionKeyDown; // Repeat left/right/down continuously
 
-// Keep track of which keys are currently being pressed
-let pressedKeys = {};
+let nextGameLoopTimestamp = 0; // for game loop (separate from animation speed)
+let nextFrameTimestamp = 0; // for blocky animation in animate()
 
-  // Params for drawing:
-  const rows = 20, cols = 10;
-  const blockSize = 25;
-
-  const frameRate = 60; // frames per second
-  const loopIntervalMillis = 50; // Game loop speed (tick every X milliseconds)
-  const keyRepeatDelay = 120; // milliseconds until key auto-repeats for left/right/soft-drop
-
-  const topMargin = 5;
-  const leftMargin = 15;
-  const rightMargin = 10;
-
-  const playfieldXPos = leftMargin;
-  const playfieldYPos = topMargin;
-
-  const playfieldWidth = blockSize * cols;
-  const playfieldHeight = blockSize * rows;
-
-  const nextQueueLeftMargin = 0.2 * playfieldWidth; 
-  const nextQueueXPos = playfieldXPos + playfieldWidth + nextQueueLeftMargin;
-  const nextQueueYPos = topMargin + 50;
-
-  const nextQueueWidth = blockSize * 4;
-  const nextQueueHeight = blockSize * rows;
-
-  const canvasWidth = leftMargin + rightMargin + playfieldWidth + nextQueueWidth + nextQueueLeftMargin;
-  const canvasHeight = playfieldHeight + 75;
-
-
-// Create and initialize canvas
-let canvasElem = document.createElement("canvas");
-canvasElem.setAttribute('width', canvasWidth);
-canvasElem.setAttribute('height', canvasHeight);
-canvasElem.id = "defaultCanvas0";
-canvasElem.textContent = "This is a Tetris game! But you'll need a modern web browser with JavaScript enabled to play the game.";
-document.getElementById("game").appendChild(canvasElem);
-
-// Set up 2d drawing context, which provides access to all drawing functions
-const draw = canvasElem.getContext('2d');
-
-
-  // Will be updated in game loop 
-  let gameOver = false;
-
-  // To track how many millis have elapsed since previous game loop tick
-  let previousTimestamp = 0;
- 
-  // Create instance of Tetris module
-  let tetris = new Tetris(rows, cols);
-
-  // Will update this on key press, pass to gameLoopTick
-  let nextMove;
-  let lastDirectionKeyDown; // Repeat left/right/down continuosly
+///////////////////////////////////////////////////////////////////////
+// Initialize the game!
+///////////////////////////////////////////////////////////////////////
   
-  // Update on every game loop tick
-  let gameState;
+// Create instance of Tetris module
+let tetris = new Tetris(ROWS, COLS);
 
+// Create canvas, save reference to 2d drawing context
+const canvasContext = createCanvas("game", CANVAS_WIDTH, CANVAS_HEIGHT);
+
+// Start the animation! Save the ID to turn the animation off later
+let animationId = window.requestAnimationFrame(animate);
+
+///////////////////////////////////////////////////////////////////////
+// User input / event listeners
+///////////////////////////////////////////////////////////////////////
 
 document.addEventListener("keydown", function(event) {
   
@@ -97,8 +66,7 @@ document.addEventListener("keydown", function(event) {
   // NOTE: important to do this *after* the return condition above; track INITIAL keypress only!
   keyDownTimestamp = window.performance.now();
 
-  // Track which keys are being held down
-  pressedKeys[currentKey] = true;
+  pressedKeys[currentKey] = true; // Track which keys are being held down
 
   // Set the next move to whichever key was most recently held down
   // (this may be overridden based on multiple keys / key repeat delay)
@@ -106,6 +74,7 @@ document.addEventListener("keydown", function(event) {
 
 }); // end keyDown handler
 
+// Remove from pressedKeys when a key is released
 document.addEventListener("keyup", function(event) {
   const currentKey = KEY_MAP[event.key || event.keyCode];
   if (currentKey === undefined) { return; } // only handle game control keys
@@ -119,127 +88,77 @@ window.addEventListener("blur", function(event) {
   pressedKeys = {};
 });
 
-
 ///////////////////////////////////////////////////////////////////////
+// Game loop / animation functions
 ///////////////////////////////////////////////////////////////////////
 
+// Run game loop every X milliseconds (GAME_LOOP_TICKS_PER_SECOND) -- or initiate
+// This allows for game actions (like automatically moving the tetromino down) to be a certain speed independent of the animation frame rate
 function updateGame () {
+  // Only run the next tick of the game loop if enough time has elapsed
+  if (window.performance.now() >= nextGameLoopTimestamp) {
+    // Update the timestamp for the next tick
+    nextGameLoopTimestamp = window.performance.now() + (1000/GAME_LOOP_TICKS_PER_SECOND);
 
-    // Run game loop every X milliseconds (loopIntervalMillis) -- or initiate
-    if (window.performance.now() - previousTimestamp >= loopIntervalMillis || window.performance.now() < loopIntervalMillis) {
-      previousTimestamp = window.performance.now();
+    // Update game state with next move, returns updated state with: sqaures array, score number, gameOver, and tetrominoQueue array
+    // NOTE: must run this BEFORE key repeat/reset conditions below; otherwise, non-repeatable moves like rotation WON'T be triggered at all
+    gameState = tetris.gameLoopTick(nextMove);
 
-      // Update game state with next move, returns updated state with: sqaures array, score number, gameOver, and tetrominoQueue array
-      // NOTE: must run this BEFORE key repeat/reset conditions below; otherwise, non-repeatable moves like rotation WON'T be triggered at all
-      gameState = tetris.gameLoopTick(nextMove);
+    // For left/right, repeat on keydown but only after a delay! Matches original game better, and easier to move 1 space at a time if needed
+    // (Otherwise, it's easy to accidentally move 2 or more spaces if you don't release the key soon enough)
+    if (window.performance.now() - keyDownTimestamp >= KEY_REPEAT_DELAY
+      && (pressedKeys[KEYS.LEFT] || pressedKeys[KEYS.RIGHT]) ) {
 
-      // For left/right, repeat on keydown but only after a delay! Matches original game better, and easier to move 1 space at a time if needed
-      // (Otherwise, it's easy to accidentally move 2 or more spaces if you don't release the key soon enough)
-      if (window.performance.now() - keyDownTimestamp >= keyRepeatDelay && (pressedKeys[KEYS.LEFT] || pressedKeys[KEYS.RIGHT]) ) {
+      if (pressedKeys[KEYS.DOWN] && pressedKeys[KEYS.LEFT]) {
+        nextMove = MOVES.LEFT_SOFT_DROP;
 
-        if (pressedKeys[KEYS.DOWN] && pressedKeys[KEYS.LEFT]) {
-          nextMove = MOVES.LEFT_SOFT_DROP;
-        } else if (pressedKeys[KEYS.DOWN] && pressedKeys[KEYS.RIGHT]) {
-          nextMove = MOVES.RIGHT_SOFT_DROP;
-        } else if (pressedKeys[KEYS.LEFT]) {
-          nextMove = MOVES.LEFT;
-        } else if (pressedKeys[KEYS.RIGHT]) {
-          nextMove = MOVES.RIGHT;
-        } 
+      } else if (pressedKeys[KEYS.DOWN] && pressedKeys[KEYS.RIGHT]) {
+        nextMove = MOVES.RIGHT_SOFT_DROP;
 
-      // Soft-drop is the only move that repeats immediately on keydown (no delay before repeating)
-      } else if (pressedKeys[KEYS.DOWN]) {
-        nextMove = MOVES.SOFT_DROP;
+      } else if (pressedKeys[KEYS.LEFT]) {
+        nextMove = MOVES.LEFT;
 
-      // For all other moves, don't repeat them on keydown! Reset nextMove after each tick of game loop
-      } else { 
-        nextMove = undefined;
-      }
+      } else if (pressedKeys[KEYS.RIGHT]) {
+        nextMove = MOVES.RIGHT;
+      } 
 
-    } //end game loop interval check
+    // Soft-drop is the only move that repeats immediately on keydown (no delay before repeating)
+    } else if (pressedKeys[KEYS.DOWN]) {
+      nextMove = MOVES.SOFT_DROP;
+
+    // For all other moves, don't repeat them on keydown! Reset nextMove after each tick of game loop
+    } else { 
+      nextMove = undefined;
+    }
+
+  } //end game loop interval check
 
   return gameState;
-} // end updateGame();
+} // end updateGame
 
+function drawFrame(gameState, canvasContext) {
 
+  // Clear canvas between frames and draw the playfield
+  clearFrame(canvasContext);
 
-function drawFrame(gameState) {
+  // Draw all tetrominoes on each frame, in the playfield and the queue
+  gameState.squares.forEach( drawPlayfieldSquare );
+  drawNextQueueTetrominoes(canvasContext, gameState.tetrominoQueue);
 
-  // Default for all shapes
-  draw.strokeStyle = "#444";
+  // Draw score
+  drawCanvasSmallHeading(canvasContext, "Score: " + gameState.score, CANVAS_WIDTH/2, CANVAS_HEIGHT - 5);
 
-  // Clear canvas between frames and draw background color
-  draw.clearRect(0, 0, canvasWidth, canvasHeight);
-  draw.fillStyle = '#eee';
-  setCanvasShadow(draw, "rgba(0, 0, 0, 0.4)", 2, 2, 4);
-  draw.fillRect(playfieldXPos, playfieldYPos, playfieldWidth, playfieldHeight);
-  resetShadow(draw);
-  draw.strokeRect(playfieldXPos, playfieldYPos, playfieldWidth, playfieldHeight);
+  // Draw "Next" above the queue
+  drawCanvasSmallHeading(canvasContext, "Next:", NEXTQUEUE_DIMENSIONS.X + (NEXTQUEUE_DIMENSIONS.WIDTH/2), NEXTQUEUE_DIMENSIONS.Y - 30);
 
-  // Draw ALL tetromino squares on each frame
-  gameState.squares.forEach( s => {
-
-    // Actual coordinates for drawing: multiple row/col by the blockSize (pixel value)
-    let xPos = playfieldXPos + s.col * blockSize;
-    let yPos = playfieldYPos + s.row * blockSize;
-
-    draw.fillStyle = s.color;
-    draw.fillRect(xPos, yPos, blockSize, blockSize);
-    draw.strokeRect(xPos, yPos, blockSize, blockSize);
-  });
-
-  // Display score! (TODO: display as a DOM element? or expand canvas to have an area for the game and separate area for UI?)
-  drawCanvasSmallHeading(draw, "Score: " + gameState.score, canvasWidth/2, canvasHeight - 5);
-
-  // Draw "Next" title:
-  drawCanvasSmallHeading(draw, "Next:", nextQueueXPos + (nextQueueWidth/2), nextQueueYPos - 30);
-
-  // Starting coordinates for first tetromino in the queue
-  let nextXStart = nextQueueXPos;
-  let nextYStart = nextQueueYPos;
-
-  // Draw the next tetrominoes in the queue
-  gameState.tetrominoQueue.forEach( tetromino => {
-
-    let xPos;
-    let yPos;
-
-    // Get the lowest (left-most) column value; use that to remove the offset, shift back to column 0
-    let colOffset = tetromino.squares.map(s => s.col).reduce( (min, cur) => {return Math.min(min, cur)}, cols);
-    [0].col;
-
-    tetromino.squares.forEach ( s => {
-
-      // Draw each square based on its coordinates but relative to the queue section
-      // and remove offset so the column values start at 0 (unlike in the game, where they spawn in the center column)
-      xPos = nextXStart + (s.col - colOffset) * blockSize;
-      yPos = nextYStart + s.row * blockSize;
-
-      draw.fillStyle = s.color;
-      setCanvasShadow(draw, "rgba(0, 0, 0, 0.3)", 2, 2, 3);
-      draw.fillRect(xPos, yPos, blockSize, blockSize);
-      resetShadow(draw);
-      draw.strokeRect(xPos, yPos, blockSize, blockSize);
-
-    }); 
-
-    // Next tetromino will be drawn below the previous one, with a margin of 1 row
-    nextYStart = yPos + blockSize * 2;
-
-  });
-
-  // If the game is over, say so! (TODO: replay option; add a subtle animation)
+  // If player lost, draw game over screen and stop animation
+  // (TODO: replay option; add a subtle animation)
   if (gameState.gameOver) {
     cancelAnimationFrame(animationId);
-    drawGameOver(draw); 
+    drawGameOver(canvasContext); 
   }
 
 } // end drawFrame()
-
-
-// This unique ID lets us turn the animation off later if needed
-let animationId;
-let nextFrameTimestamp = 0;
 
 // Animation loop with requestAnimationFrame 
 function animate(currentTimestamp) {
@@ -254,21 +173,29 @@ function animate(currentTimestamp) {
   // If it HAS been long enough, update time for the next animation frame
   nextFrameTimestamp = currentTimestamp + (1000/FRAMES_PER_SECOND);
 
-  // Clear the whole canvas between each animation frame
-  draw.clearRect(0, 0, canvasWidth, canvasHeight);
- 
   // Repeat the animation loop forever (until we stop it)
   animationId = window.requestAnimationFrame(animate);
   
   // Update the game state, drawing everything for the current animation frame as needed
-  let gameState = updateGame();
-  drawFrame(gameState);
+  gameState = updateGame();
+  drawFrame(gameState, canvasContext);
 }
 
-// Start the animation loop!
-animationId = window.requestAnimationFrame(animate);
+////////////////////////////////////////////////////////////////////////////
+// Canvas drawing functions
+////////////////////////////////////////////////////////////////////////////
 
+// Create canvas, add to the web page, and return the 2d drawing context
+function createCanvas(containerElemId, width, height) {
+  let canvasElem = document.createElement("canvas");
+  canvasElem.setAttribute('width', width);
+  canvasElem.setAttribute('height', height);
+  canvasElem.textContent = "This is a Tetris game! But you'll need a modern web browser with JavaScript enabled to play the game.";
+  document.getElementById(containerElemId).appendChild(canvasElem);
 
+  // Return 2d drawing context for access to all drawing functions
+  return canvasElem.getContext('2d');
+}
 
 // Set shadow properties using canvas API:
 //  canvasContext: drawing context for the canvas element
@@ -281,13 +208,11 @@ function setCanvasShadow(canvasContext, color, xOffset, yOffset, blurRadius) {
   canvasContext.shadowColor = color;
 }
 
-
 // Reset shadow (0 opacity)
 // TODO: look this up; surely there's a better way, lol!
 function resetShadow(canvasContext) {
   canvasContext.shadowColor = "rgba(0, 0, 0, 0.0)";
 }
-
 
 // Canvas styles for small headings
 // text: string of text to draw
@@ -298,29 +223,94 @@ function drawCanvasSmallHeading(canvasContext, text, xPos, yPos) {
   canvasContext.font = "30px sans-serif";
   canvasContext.textAlign = "center";
   canvasContext.fillText(text, xPos, yPos);
-  setCanvasShadow(draw, "rgba(0, 0, 0, 0.4)", 1, 1, 4);
+  setCanvasShadow(canvasContext, "rgba(0, 0, 0, 0.4)", 1, 1, 4);
   resetShadow(canvasContext);
 }
 
+// Clear canvas between frames and draw background color
+function clearFrame(canvasContext) {
+
+  // Clear entire canvas between frames
+  canvasContext.clearRect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
+
+  // Draw playfield background
+  canvasContext.fillStyle = '#eee';
+  setCanvasShadow(canvasContext, "rgba(0, 0, 0, 0.4)", 2, 2, 4);
+  canvasContext.fillRect(PLAYFIELD_DIMENSIONS.X, PLAYFIELD_DIMENSIONS.Y, PLAYFIELD_DIMENSIONS.WIDTH, PLAYFIELD_DIMENSIONS.HEIGHT);
+
+  // Draw outline around playfield
+  resetShadow(canvasContext);
+  canvasContext.strokeStyle = "#222";
+  canvasContext.strokeRect(PLAYFIELD_DIMENSIONS.X, PLAYFIELD_DIMENSIONS.Y, PLAYFIELD_DIMENSIONS.WIDTH, PLAYFIELD_DIMENSIONS.HEIGHT);
+}
+
+// Given a square for a tetromino on the playfield, draw it!
+function drawPlayfieldSquare (s) {
+  // Actual coordinates for drawing: multiply row/col by the BLOCK_SIZE 
+  let xPos = PLAYFIELD_DIMENSIONS.X + s.col * BLOCK_SIZE;
+  let yPos = PLAYFIELD_DIMENSIONS.Y + s.row * BLOCK_SIZE;
+
+  canvasContext.fillStyle = s.color;
+  canvasContext.strokeStyle = "#444";
+  canvasContext.fillRect(xPos, yPos, BLOCK_SIZE, BLOCK_SIZE);
+  canvasContext.strokeRect(xPos, yPos, BLOCK_SIZE, BLOCK_SIZE);
+}
+
+// Given an array of upcoming tetrominoes, draw them in the queue!
+function drawNextQueueTetrominoes (canvasContext, tetrominoQueue) {
+  
+  // Starting coordinates for first tetromino in the queue
+  // Updates at end of loop, to draw each tetromio underneath the last
+  let nextXStart = NEXTQUEUE_DIMENSIONS.X;
+  let nextYStart = NEXTQUEUE_DIMENSIONS.Y;
+
+  tetrominoQueue.forEach( tetromino => {
+
+    let xPos, yPos;
+
+    // Get the lowest (left-most) column value; use that to remove the offset, shift back to column 0
+    let colOffset = tetromino.squares.map(s => s.col).reduce( (min, cur) => {return Math.min(min, cur)}, COLS);
+    [0].col;
+
+      // Draw each square based on its coordinates but relative to the queue section
+      // and remove offset so the column values start at 0 (unlike in the game, where they spawn in the center column)
+    tetromino.squares.forEach( s => {
+      xPos = nextXStart + (s.col - colOffset) * BLOCK_SIZE;
+      yPos = nextYStart + s.row * BLOCK_SIZE;
+
+      canvasContext.fillStyle = s.color;
+      canvasContext.strokeStyle = "#444";
+      setCanvasShadow(canvasContext, "rgba(0, 0, 0, 0.3)", 2, 2, 3);
+      canvasContext.fillRect(xPos, yPos, BLOCK_SIZE, BLOCK_SIZE);
+      resetShadow(canvasContext);
+      canvasContext.strokeRect(xPos, yPos, BLOCK_SIZE, BLOCK_SIZE);
+    }); 
+
+    // Next tetromino will be drawn below the previous one, with a margin of 1 row
+    // NOTE: the last yPos will be from the bottom-most square, squares in a tetromino are in order from top left to bottom right
+    nextYStart = yPos + BLOCK_SIZE * 2;
+  }); // end forEach tetromino
+
+} // end drawNextQueueTetrominoes
 
 // Draw "Game over" text and a sad/mad ASCII emoji
 function drawGameOver(canvasContext) {
 
   // Semi-transparent white mask over the game
   canvasContext.fillStyle = "rgba(255, 255, 255, 0.8)";
-  canvasContext.fillRect(0, 0, canvasWidth, canvasHeight);
+  canvasContext.fillRect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
 
   // Large "game over" text
   canvasContext.fillStyle = "#555";
   canvasContext.font = "50px sans-serif";
   canvasContext.textAlign = "center";
   setCanvasShadow(canvasContext, "rgba(0, 0, 0, 0.3)", 1, 1, 3);
-  canvasContext.fillText("Game over!", canvasWidth/2, canvasHeight/2 - 65); 
+  canvasContext.fillText("Game over!", CANVAS_WIDTH/2, CANVAS_HEIGHT/2 - 65); 
 
   // Draw a random sad or mad ASCII emoji from array in constants.js
   const EMOJI = ASCII_EMOJIS[getRandomIntInclusive(0, ASCII_EMOJIS.length-1)];
   canvasContext.font = "40px sans-serif";
-  canvasContext.fillText(EMOJI, canvasWidth/2, canvasHeight/2 + 15); 
+  canvasContext.fillText(EMOJI, CANVAS_WIDTH/2, CANVAS_HEIGHT/2 + 15); 
   resetShadow(canvasContext);
 }
 

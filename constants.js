@@ -1,3 +1,7 @@
+export const ROWS = 20;
+export const COLS = 10;
+export const BLOCK_SIZE = 25; // size of each square in the grid, in pixels
+
 // Normalized key names used in KEY_MAP defined below
 export const KEYS = {
   UP: "upArrow",
@@ -77,3 +81,36 @@ export const ASCII_EMOJIS = [
   "‧º·(˚ ˃̣̣̥⌓˂̣̣̥ )‧º·˚",
   "(︶︹︶)"
 ];
+
+//////////////////////////////////////////////////////////
+// Canvas drawing / dimensions
+//////////////////////////////////////////////////////////
+const CANVAS_MARGINS = {
+  TOP: 5,
+  LEFT: 15,
+  RIGHT: 10
+};
+
+// For drawing the game's playfield (dimensions in pixels)
+export const PLAYFIELD_DIMENSIONS = {
+  X: CANVAS_MARGINS.LEFT,
+  Y: CANVAS_MARGINS.TOP,
+  WIDTH: BLOCK_SIZE * COLS,
+  HEIGHT: BLOCK_SIZE * ROWS,
+};
+
+// Margin between the playfield and the queue of next terominoes
+const NEXTQUEUE_MARGIN_LEFT = 0.2 * PLAYFIELD_DIMENSIONS.WIDTH; 
+
+// For drawing queue of upcoming tetrominoes (dimensions in pixels)
+export const NEXTQUEUE_DIMENSIONS = {
+  X: PLAYFIELD_DIMENSIONS.X + PLAYFIELD_DIMENSIONS.WIDTH + NEXTQUEUE_MARGIN_LEFT,
+  Y: CANVAS_MARGINS.TOP + 50,
+  WIDTH: BLOCK_SIZE * 4
+  // HEIGHT: BLOCK_SIZE * ROWS // not being used
+};
+
+export const CANVAS_WIDTH = CANVAS_MARGINS.LEFT + CANVAS_MARGINS.RIGHT + PLAYFIELD_DIMENSIONS.WIDTH + NEXTQUEUE_DIMENSIONS.WIDTH + NEXTQUEUE_MARGIN_LEFT;
+
+export const CANVAS_HEIGHT = PLAYFIELD_DIMENSIONS.HEIGHT + 75;
+
